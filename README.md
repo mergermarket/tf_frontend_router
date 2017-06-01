@@ -43,7 +43,7 @@ variable "platform_config" {
 }
 
 module "frontend_router" {
-  source = "../.."
+  source = "github.com/mergermarket/tf_frontend_router"
 
   dns_domain      = "domain.com"
   team            = "humptydumptyteam"
