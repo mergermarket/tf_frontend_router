@@ -1,0 +1,12 @@
+{
+  "platform_config": {
+    "azs": "eu-west-1a,eu-west-1b,eu-west-1c",
+    "elb_certificates.domain_com": "arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012",
+    "route53_zone_id.domain_com": "AAAAAAAAAAAAA",
+    "ecs_cluster.default.client_security_group": "sg-00000000",
+    "ecs_cluster.default.security_group": "sg-11111111",
+    "vpc": "vpc-12345678",
+    "public_subnets": "subnet-33333333,subnet-44444444,subnet-55555555",
+    "private_subnets": "subnet-00000000,subnet-11111111,subnet-22222222"
+  }
+}
