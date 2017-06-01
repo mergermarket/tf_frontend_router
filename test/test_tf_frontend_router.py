@@ -1,4 +1,6 @@
 import os
+import shutil
+import tempfile
 import unittest
 from string import ascii_lowercase
 from subprocess import check_call, check_output
@@ -10,10 +12,15 @@ from hypothesis.strategies import sampled_from, text
 class TestTFFrontendRouter(unittest.TestCase):
 
     def setUp(self):
-        check_call(['terraform', 'get', 'test/infra'])
+        self.workdir = tempfile.mkdtemp()
+        self.base_path = os.getcwd()
+        self.module_path = os.path.join(os.getcwd(), 'test', 'infra')
+
+        check_call(['terraform', 'get', self.module_path], cwd=self.workdir)
 
     def tearDown(self):
-        check_call(['rm', '-rf', '.terraform'])
+        if os.path.isdir(self.workdir):
+            shutil.rmtree(self.workdir)
 
     def _env_for_check_output(self, fastly_api_key):
         env = os.environ.copy()
@@ -46,11 +53,15 @@ class TestTFFrontendRouter(unittest.TestCase):
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
             '-var', 'dns_domain=domain.com',
-            '-var-file=test/platform-config/eu-west-1.json',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
             '-no-color'
         ] + self._target_module('frontend_router') + [
-            'test/infra'
-        ], env=self._env_for_check_output('qwerty')).decode('utf-8')
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
 
         # Then
         assert """
@@ -67,11 +78,15 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
             '-var', 'dns_domain=domain.com',
-            '-var-file=test/platform-config/eu-west-1.json',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
             '-no-color'
         ] + self._target_module('frontend_router') + [
-            'test/infra'
-        ], env=self._env_for_check_output('qwerty')).decode('utf-8')
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
 
         # Then
         assert """
@@ -105,11 +120,15 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
             '-var', 'dns_domain=domain.com',
-            '-var-file=test/platform-config/eu-west-1.json',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
             '-no-color'
         ] + self._target_module('frontend_router') + [
-            'test/infra'
-        ], env=self._env_for_check_output('qwerty')).decode('utf-8')
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
 
         assert """
 + module.frontend_router.default_backend_ecs_service.aws_ecs_service.service
@@ -142,11 +161,15 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
             '-var', 'dns_domain=domain.com',
-            '-var-file=test/platform-config/eu-west-1.json',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
             '-no-color'
         ] + self._target_module('frontend_router') + [
-            'test/infra'
-        ], env=self._env_for_check_output('qwerty')).decode('utf-8')
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
 
         # Then
         assert """
@@ -176,11 +199,15 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
             '-var', 'dns_domain=domain.com',
-            '-var-file=test/platform-config/eu-west-1.json',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
             '-no-color'
         ] + self._target_module('frontend_router') + [
-            'test/infra'
-        ], env=self._env_for_check_output('qwerty')).decode('utf-8')
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
 
         # Then
         assert """
@@ -206,11 +233,15 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
             '-var', 'dns_domain=domain.com',
-            '-var-file=test/platform-config/eu-west-1.json',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
             '-no-color'
         ] + self._target_module('frontend_router') + [
-            'test/infra'
-        ], env=self._env_for_check_output('qwerty')).decode('utf-8')
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
 
         # Then
         assert """
@@ -250,11 +281,15 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
             '-var', 'dns_domain=domain.com',
-            '-var-file=test/platform-config/eu-west-1.json',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
             '-no-color'
         ] + self._target_module('frontend_router') + [
-            'test/infra'
-        ], env=self._env_for_check_output('qwerty')).decode('utf-8')
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
 
         # Then
         assert """
@@ -346,11 +381,15 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
             '-var', 'dns_domain=domain.com',
-            '-var-file=test/platform-config/eu-west-1.json',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
             '-no-color'
         ] + self._target_module('frontend_router') + [
-            'test/infra'
-        ], env=self._env_for_check_output('qwerty')).decode('utf-8')
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
 
         # Then
         assert """
