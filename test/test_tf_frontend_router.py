@@ -364,6 +364,47 @@ Plan: 10 to add, 0 to change, 0 to destroy.
     header.3700817666.response_condition:         ""
         """.strip() in output # noqa
 
+    def test_create_fastly_config_disable_fastly_caching(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=foo',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'aws_region=eu-west-1',
+            '-var', 'dns_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color'
+        ] + self._target_module('frontend_router_disable_fastly_caching') + [
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
+
+        # Then
+        assert """
++ module.frontend_router_disable_fastly_caching.fastly.fastly_service_v1.fastly
+        """.strip() in output # noqa
+
+        assert """
+    request_setting.#:                            "1"
+    request_setting.2432135539.action:            ""
+    request_setting.2432135539.bypass_busy_wait:  ""
+    request_setting.2432135539.default_host:      ""
+    request_setting.2432135539.force_miss:        "true"
+    request_setting.2432135539.force_ssl:         "true"
+    request_setting.2432135539.geo_headers:       ""
+    request_setting.2432135539.hash_keys:         ""
+    request_setting.2432135539.max_stale_age:     "60"
+    request_setting.2432135539.name:              "disable caching"
+    request_setting.2432135539.request_condition: "all_urls"
+    request_setting.2432135539.timer_support:     ""
+    request_setting.2432135539.xff:               "append"
+        """.strip() in output # noqa
+
     @given(
         env=sampled_from(('ci', 'dev', 'aslive', 'live')),
         component=text(alphabet=ascii_lowercase, min_size=16, max_size=32)

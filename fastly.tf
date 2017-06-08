@@ -4,4 +4,5 @@ module "fastly" {
   domain_name     = "${var.dns_domain}"
   backend_address = "${module.alb.alb_dns_name}"
   env             = "${var.env}"
+  caching         = "${var.fastly_caching}"
 }

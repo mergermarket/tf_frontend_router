@@ -24,6 +24,19 @@ module "frontend_router" {
   # backend_ip = "1.1.1.1"
 }
 
+module "frontend_router_disable_fastly_caching" {
+  source = "../.."
+
+  dns_domain      = "${var.dns_domain}"
+  team            = "${var.team}"
+  env             = "${var.env}"
+  component       = "${var.component}"
+  platform_config = "${var.platform_config}"
+
+  # optional
+  fastly_caching = "false"
+}
+
 # variables
 variable "dns_domain" {}
 
