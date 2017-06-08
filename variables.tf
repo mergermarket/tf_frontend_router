@@ -33,3 +33,9 @@ variable "backend_ip" {
   type        = "string"
   default     = "404"
 }
+
+variable "fastly_caching" {
+  description = "Whether to enable / forcefully disable caching on Fastly (default: true)"
+  type        = "string"
+  default     = "true"
+}

@@ -21,6 +21,7 @@ Module Input Variables
 - `component` - (string) - **REQUIRED** - component name
 - `platform_config` - (map) **REQUIRED** - Mergermarket Platform config dictionary (see tests for example one)
 - `backend_ip` - (string) - If set to IP - it'll cause a proxying service to be deployed that will proxy - by default - all requests to given IP; this IP should be / can be different per environment and configured via `config` mechanism.  Default `404` - will deploy service that - by default - returns 404s to all requests
+- `fastly_caching` - (bool) - Controls whether to enable / forcefully disable caching (default: true)
 
 Usage
 -----
@@ -52,7 +53,8 @@ module "frontend_router" {
   platform_config = "${var.platform_config}"
 
   # optional
-  # backend_ip = "1.1.1.1"
+  # backend_ip     = "1.1.1.1"
+  # fastly_caching = "false"
 }
 ```
 
