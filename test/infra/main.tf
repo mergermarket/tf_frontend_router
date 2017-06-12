@@ -14,7 +14,8 @@ provider "aws" {
 module "frontend_router" {
   source = "../.."
 
-  dns_domain      = "${var.dns_domain}"
+  fastly_domain   = "${var.fastly_domain}"
+  alb_domain      = "${var.alb_domain}"
   team            = "${var.team}"
   env             = "${var.env}"
   component       = "${var.component}"
@@ -27,7 +28,8 @@ module "frontend_router" {
 module "frontend_router_disable_fastly_caching" {
   source = "../.."
 
-  dns_domain      = "${var.dns_domain}"
+  fastly_domain   = "${var.fastly_domain}"
+  alb_domain      = "${var.alb_domain}"
   team            = "${var.team}"
   env             = "${var.env}"
   component       = "${var.component}"
@@ -38,7 +40,9 @@ module "frontend_router_disable_fastly_caching" {
 }
 
 # variables
-variable "dns_domain" {}
+variable "fastly_domain" {}
+
+variable "alb_domain" {}
 
 variable "team" {}
 

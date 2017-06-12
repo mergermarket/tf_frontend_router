@@ -43,6 +43,6 @@ module "alb" {
   vpc_id                   = "${var.platform_config["vpc"]}"
   subnet_ids               = ["${var.platform_config["public_subnets"]}"]
   internal                 = "false"
-  certificate_arn          = "${var.platform_config["elb_certificates.${replace(var.dns_domain, "/\\./", "_")}"]}"
+  certificate_arn          = "${var.platform_config["elb_certificates.${replace(var.alb_domain, "/\\./", "_")}"]}"
   default_target_group_arn = "${module.default_backend_ecs_service.target_group_arn}"
 }
