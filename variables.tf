@@ -1,5 +1,5 @@
 # required
-variable "dns_domain" {
+variable "fastly_domain" {
   description = ""
   type        = "string"
 }
@@ -28,6 +28,12 @@ variable "platform_config" {
 }
 
 # optional
+variable "alb_domain" {
+  description = ""
+  type        = "string"
+  default     = "mmgapi.net"
+}
+
 variable "backend_ip" {
   description = "Backend to route all requests by default to; default: 404 (see README)"
   type        = "string"

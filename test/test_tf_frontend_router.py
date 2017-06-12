@@ -52,7 +52,8 @@ class TestTFFrontendRouter(unittest.TestCase):
             '-var', 'component=foobar',
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
-            '-var', 'dns_domain=domain.com',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
@@ -77,7 +78,8 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'component=foobar',
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
-            '-var', 'dns_domain=domain.com',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
@@ -119,7 +121,8 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'component=foobar',
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
-            '-var', 'dns_domain=domain.com',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
@@ -160,7 +163,8 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'component=foobar',
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
-            '-var', 'dns_domain=domain.com',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
@@ -198,7 +202,8 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'component=foobar',
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
-            '-var', 'dns_domain=domain.com',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
@@ -232,7 +237,8 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'component=foobar',
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
-            '-var', 'dns_domain=domain.com',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
@@ -280,7 +286,8 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'component=foobar',
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
-            '-var', 'dns_domain=domain.com',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
@@ -322,13 +329,13 @@ Plan: 10 to add, 0 to change, 0 to destroy.
     condition.820439921.priority:                 "5"
     condition.820439921.statement:                "req.url ~ \\"^/robots.txt\\""
     condition.820439921.type:                     "REQUEST"
-    default_host:                                 "foo-www.domain.com"
+    default_host:                                 "foo-www.externaldomain.com"
     default_ttl:                                  "60"
     domain.#:                                     "2"
-    domain.3615871875.comment:                    ""
-    domain.3615871875.name:                       "foo.domain.com"
-    domain.769623268.comment:                     ""
-    domain.769623268.name:                        "foo-www.domain.com"
+    domain.1864502246.comment:                    ""
+    domain.1864502246.name:                       "foo-www.externaldomain.com"
+    domain.4243527184.comment:                    ""
+    domain.4243527184.name:                       "foo.externaldomain.com"
     force_destroy:                                "true"
     gzip.#:                                       "1"
     gzip.2425354137.cache_condition:              ""
@@ -362,6 +369,23 @@ Plan: 10 to add, 0 to change, 0 to destroy.
     header.3700817666.regex:                      "<computed>"
     header.3700817666.request_condition:          ""
     header.3700817666.response_condition:         ""
+    header.3700817666.source:                     "\\"LHC\\""
+    header.3700817666.substitution:               "<computed>"
+    header.3700817666.type:                       "cache"
+    name:                                         "foo-externaldomain.com"
+    request_setting.#:                            "1"
+    request_setting.4061384956.action:            ""
+    request_setting.4061384956.bypass_busy_wait:  ""
+    request_setting.4061384956.default_host:      ""
+    request_setting.4061384956.force_miss:        "false"
+    request_setting.4061384956.force_ssl:         "true"
+    request_setting.4061384956.geo_headers:       ""
+    request_setting.4061384956.hash_keys:         ""
+    request_setting.4061384956.max_stale_age:     "60"
+    request_setting.4061384956.name:              "disable caching"
+    request_setting.4061384956.request_condition: "all_urls"
+    request_setting.4061384956.timer_support:     ""
+    request_setting.4061384956.xff:               "append"
         """.strip() in output # noqa
 
     def test_create_fastly_config_disable_fastly_caching(self):
@@ -373,7 +397,8 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'component=foobar',
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
-            '-var', 'dns_domain=domain.com',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
@@ -421,7 +446,8 @@ Plan: 10 to add, 0 to change, 0 to destroy.
             '-var', 'component={}'.format(component),
             '-var', 'team=foobar',
             '-var', 'aws_region=eu-west-1',
-            '-var', 'dns_domain=domain.com',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
