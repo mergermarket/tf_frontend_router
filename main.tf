@@ -25,6 +25,7 @@ module "default_backend_task_definition" {
 
   family                = "default_backend"
   container_definitions = ["${var.backend_ip == "404" ? module.404_container_definition.rendered : module.haproxy_proxy_container_definition.rendered}"]
+  aws_region            = "${var.aws_region}"
 }
 
 module "default_backend_ecs_service" {
