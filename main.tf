@@ -49,6 +49,4 @@ module "alb" {
   internal                 = "false"
   certificate_arn          = "${var.platform_config["elb_certificates.${replace(var.alb_domain, "/\\./", "_")}"]}"
   default_target_group_arn = "${module.default_backend_ecs_service.target_group_arn}"
-
-  depends_on = ["module.default_backend_ecs_service"]
 }
