@@ -41,7 +41,7 @@ module "alb" {
 
   name                     = "${join("", slice(split("", format("%s-%s", var.env, var.component)), 0, length(format("%s-%s", var.env, var.component)) > 22 ? 23 : length(format("%s-%s", var.env, var.component))))}-router"
   vpc_id                   = "${var.platform_config["vpc"]}"
-  subnet_ids               = ["${var.platform_config["public_subnets"]}"]
+  subnet_ids               = ["${split(",", var.platform_config["public_subnets"])}"]
   internal                 = "false"
   certificate_arn          = "${var.platform_config["elb_certificates.${replace(var.alb_domain, "/\\./", "_")}"]}"
   default_target_group_arn = "${module.default_backend_ecs_service.target_group_arn}"
