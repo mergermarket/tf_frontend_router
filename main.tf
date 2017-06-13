@@ -1,19 +1,21 @@
 module "404_container_definition" {
   source = "github.com/mergermarket/tf_ecs_container_definition"
 
-  name   = "404"
-  image  = "mergermarket/404"
-  cpu    = "16"
-  memory = "16"
+  name           = "404"
+  image          = "mergermarket/404"
+  cpu            = "16"
+  memory         = "16"
+  container_port = "8000"
 }
 
 module "haproxy_proxy_container_definition" {
   source = "github.com/mergermarket/tf_ecs_container_definition"
 
-  name   = "haproxy"
-  image  = "mergermarket/haproxy-proxy"
-  cpu    = "16"
-  memory = "32"
+  name           = "haproxy"
+  image          = "mergermarket/haproxy-proxy"
+  cpu            = "16"
+  memory         = "32"
+  container_port = "80"
 
   container_env = {
     BACKEND_IP = "${var.backend_ip}"
@@ -32,6 +34,7 @@ module "default_backend_ecs_service" {
 
   name            = "${join("", slice(split("", format("%s-%s", var.env, var.component)), 0, length(format("%s-%s", var.env, var.component)) > 22 ? 23 : length(format("%s-%s", var.env, var.component))))}-default"
   container_name  = "${var.backend_ip == "404" ? "404" : "haproxy"}"
+  container_port  = "${var.backend_ip == "404" ? "8000" : "80"}"
   vpc_id          = "${var.platform_config["vpc"]}"
   task_definition = "${module.default_backend_task_definition.arn}"
   desired_count   = "${var.env == "live" ? 2 : 1}"
