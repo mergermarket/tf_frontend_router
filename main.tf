@@ -23,7 +23,7 @@ module "haproxy_proxy_container_definition" {
 module "default_backend_task_definition" {
   source = "github.com/mergermarket/tf_ecs_task_definition"
 
-  family                = "default_backend"
+  family                = "${join("", slice(split("", format("%s-%s", var.env, var.component)), 0, length(format("%s-%s", var.env, var.component)) > 22 ? 23 : length(format("%s-%s", var.env, var.component))))}-default"
   container_definitions = ["${var.backend_ip == "404" ? module.404_container_definition.rendered : module.haproxy_proxy_container_definition.rendered}"]
 }
 
