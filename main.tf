@@ -31,6 +31,7 @@ module "default_backend_ecs_service" {
   source = "github.com/mergermarket/tf_load_balanced_ecs_service"
 
   name            = "${join("", slice(split("", format("%s-%s", var.env, var.component)), 0, length(format("%s-%s", var.env, var.component)) > 22 ? 23 : length(format("%s-%s", var.env, var.component))))}-default"
+  container_name  = "${var.backend_ip == "404" ? "404" : "haproxy"}"
   vpc_id          = "${var.platform_config["vpc"]}"
   task_definition = "${module.default_backend_task_definition.arn}"
   desired_count   = "${var.env == "live" ? 2 : 1}"
