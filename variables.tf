@@ -40,7 +40,7 @@ variable "backend_ip" {
   default     = "404"
 }
 
-variable "ssl_check_cert" {
+variable "ssl_cert_check" {
   description = "Check the backend cert is valid"
   type        = "string"
   default     = "true"
