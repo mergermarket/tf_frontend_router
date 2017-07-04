@@ -40,6 +40,18 @@ variable "backend_ip" {
   default     = "404"
 }
 
+variable "ssl_check_cert" {
+  description = "Check the backend cert is valid"
+  type        = "string"
+  default     = "true"
+}
+
+variable "ssl_cert_hostname" {
+  description = "The hostname to validate the certificate presented by the backend against"
+  type        = "string"
+  default     = ""
+}
+
 variable "fastly_caching" {
   description = "Whether to enable / forcefully disable caching on Fastly (default: true)"
   type        = "string"
