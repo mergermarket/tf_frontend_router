@@ -20,6 +20,7 @@ module "frontend_router" {
   env             = "${var.env}"
   component       = "${var.component}"
   platform_config = "${var.platform_config}"
+  le_logset_id    = "${var.le_logset_id}"
 
   # optional
   # backend_ip = "1.1.1.1"
@@ -28,12 +29,13 @@ module "frontend_router" {
 module "frontend_router_disable_fastly_caching" {
   source = "../.."
 
-  fastly_domain         = "${var.fastly_domain}"
-  alb_domain            = "${var.alb_domain}"
-  team                  = "${var.team}"
-  env                   = "${var.env}"
-  component             = "${var.component}"
-  platform_config       = "${var.platform_config}"
+  fastly_domain   = "${var.fastly_domain}"
+  alb_domain      = "${var.alb_domain}"
+  team            = "${var.team}"
+  env             = "${var.env}"
+  component       = "${var.component}"
+  platform_config = "${var.platform_config}"
+  le_logset_id    = "${var.le_logset_id}"
 
   # optional
   fastly_caching = "false"
@@ -51,6 +53,7 @@ module "frontend_router_timeouts" {
   connect_timeout       = "${var.connect_timeout}"
   first_byte_timeout    = "${var.first_byte_timeout}"
   between_bytes_timeout = "${var.between_bytes_timeout}"
+  le_logset_id          = "${var.le_logset_id}"
 }
 
 # variables
@@ -64,8 +67,12 @@ variable "env" {}
 
 variable "component" {}
 
+variable "le_logset_id" {
+  default = "123"
+}
+
 variable "backend_ip" {
-	default = "404"
+  default = "404"
 }
 
 variable "platform_config" {

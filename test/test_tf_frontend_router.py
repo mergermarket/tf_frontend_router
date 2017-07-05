@@ -101,7 +101,7 @@ class TestTFFrontendRouter(unittest.TestCase):
 
         # Then
         assert """
-Plan: 11 to add, 0 to change, 0 to destroy.
+Plan: 12 to add, 0 to change, 0 to destroy.
         """.strip() in output
 
     def test_create_default_404_service_target_group(self):
@@ -827,3 +827,48 @@ Plan: 11 to add, 0 to change, 0 to destroy.
       backend.~{ident}.error_threshold:          "0"
       backend.~{ident}.first_byte_timeout:       "54321"
         """.strip()), output) # noqa
+
+    def test_fastly_logging_config(self):
+        # Given
+
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=dev',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'aws_region=eu-west-1',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color'
+        ] + self._target_module('frontend_router') + [
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
+
+        # Then
+        assert re.search(template_to_re("""
+      logentries.#:                                 "1"
+      logentries.~{ident}.format:                "%h %l %u %t %r %>s"
+      logentries.~{ident}.name:                  "dev-externaldomain.com"
+      logentries.~{ident}.port:                  "20000"
+      logentries.~{ident}.response_condition:    ""
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
+      logentries.~{ident}.use_tls:               "true"
+        """.strip()), output) # noqa
+
+        assert """
+  + module.frontend_router.module.fastly.logentries_log.logs
+      logset_id:        "123"
+      name:             "dev-externaldomain.com"
+      retention_period: "ACCOUNT_DEFAULT"
+      source:           "token"
+      token:            "<computed>"
+        """.strip() in output # noqa

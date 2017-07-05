@@ -10,14 +10,17 @@ When included and configured this module will:
 - create a HTTPS Listener on default ALB with default rule
 - the default rule will be either 404 service (microservice which returns 404 responses to all requests) or haproxy proxy which will proxy all requests to configured `BACKEND_IP`
 - output ALB Listener ARN and DNS Record for the ALB - you'll need both to be able to integrate your services with the ALB
-- create Fastly configuration and 1:1 map it to the ALB
+- create Fastly configuration and 1:1 map it to the ALB (Fastly will log all requests to Logentries by default)
 
 Finaly product is AWS ALB which you can configure your services to be attached.
+
+**NOTE** - in order to use underlying Fastly dependency (within `tf_fastly_frontend`), you must set `LOGENTRIES_ACCOUNT_KEY` environment variable before you use this module - otherwise `tf_fastly_frontend` module won't be able to create Logentries Logset and will fail.
 
 Module Input Variables
 ----------------------
 
 - `fastly_domain` - (string) - **REQUIRED** - DNS Domain name to be used as a entry to the service (Fastly will be configured to use it)
+- `le_logset_id` - (string) - **REQUIRED** - Logentries Logset ID under which Logs will be sent to (provided by platform config)
 - `team` - (string) - **REQUIRED** - Name of Team deploying the ALB - will affect ALBs name
 - `env` - (string) - **REQUIRED** - Environment deployed to
 - `component` - (string) - **REQUIRED** - component name
@@ -43,7 +46,8 @@ variable "platform_config" {
       ecs_cluster.default.client_security_group: "sg-00000000",
       ecs_cluster.default.security_group: "sg-11111111",
       vpc: "vpc-12345678",
-      public_subnets: "subnet-00000000,subnet-11111111,subnet-22222222"
+      public_subnets: "subnet-00000000,subnet-11111111,subnet-22222222",
+      logentries_fastly_logset_id: "111-222-333-444-555"
     }
   }
 }
@@ -52,6 +56,7 @@ module "frontend_router" {
   source = "github.com/mergermarket/tf_frontend_router"
 
   fastly_domain   = "externaldomain.com"
+  le_logset_id    = "${lookup(var.platform_config, "logentries_fastly_logset_id")}"
   alb_domain      = "domain.com"
   team            = "humptydumptyteam"
   env             = "ci"
