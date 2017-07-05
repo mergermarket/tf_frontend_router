@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import tempfile
 import unittest
@@ -7,6 +8,39 @@ from subprocess import check_call, check_output
 
 from hypothesis import given
 from hypothesis.strategies import sampled_from, text
+
+
+"""
+Takes a template (i.e. what you'd call `.format(...)` on, and returns a regex
+to to match it:
+    print(re.match(
+        template_to_re("hello {name}"),
+        "hello world"
+    ).group("name"))
+    # prints "world"
+"""
+
+
+def template_to_re(t):
+    seen = dict()
+
+    def pattern(placeholder, open_curly, close_curly, text):
+        if text is not None:
+            return re.escape(text)
+        elif open_curly is not None:
+            return r'\{'
+        elif close_curly is not None:
+            return r'\}'
+        elif seen.get(placeholder):
+            return '(?P={})'.format(placeholder)
+        else:
+            seen[placeholder] = True
+            return '(?P<{}>.*?)'.format(placeholder)
+
+    return "".join([
+        pattern(*match.groups())
+        for match in re.finditer(r'{([\w_]+)}|(\{\{)|(\}\})|([^{}]+)', t)
+    ])
 
 
 class TestTFFrontendRouter(unittest.TestCase):
@@ -91,26 +125,26 @@ Plan: 10 to add, 0 to change, 0 to destroy.
         )
 
         # Then
-        assert """
+        assert re.search(template_to_re("""
 + module.frontend_router.default_backend_ecs_service.aws_alb_target_group.target_group
     arn:                                "<computed>"
     arn_suffix:                         "<computed>"
     deregistration_delay:               "10"
     health_check.#:                     "1"
-    health_check.0.healthy_threshold:   "2"
-    health_check.0.interval:            "5"
-    health_check.0.matcher:             "200-299"
-    health_check.0.path:                "/internal/healthcheck"
-    health_check.0.port:                "traffic-port"
-    health_check.0.protocol:            "HTTP"
-    health_check.0.timeout:             "4"
-    health_check.0.unhealthy_threshold: "2"
+    health_check.{ident}.healthy_threshold:   "2"
+    health_check.{ident}.interval:            "5"
+    health_check.{ident}.matcher:             "200-299"
+    health_check.{ident}.path:                "/internal/healthcheck"
+    health_check.{ident}.port:                "traffic-port"
+    health_check.{ident}.protocol:            "HTTP"
+    health_check.{ident}.timeout:             "4"
+    health_check.{ident}.unhealthy_threshold: "2"
     name:                               "foo-foobar-default"
     port:                               "31337"
     protocol:                           "HTTP"
     stickiness.#:                       "<computed>"
     vpc_id:                             "vpc-12345678"
-        """.strip() in output # noqa
+        """.strip()), output) # noqa
 
     def test_create_default_404_service_ecs_service(self):
         # When
@@ -135,24 +169,23 @@ Plan: 10 to add, 0 to change, 0 to destroy.
 
         assert """
 + module.frontend_router.default_backend_ecs_service.aws_ecs_service.service
-    cluster:                                    "default"
-    deployment_maximum_percent:                 "200"
-    deployment_minimum_healthy_percent:         "100"
-    desired_count:                              "1"
-    iam_role:                                   "${aws_iam_role.role.arn}"
-    load_balancer.#:                            "1"
-    load_balancer.~2788651468.container_name:   "app"
-    load_balancer.~2788651468.container_port:   "8000"
-    load_balancer.~2788651468.elb_name:         ""
-    load_balancer.~2788651468.target_group_arn: "${aws_alb_target_group.target_group.arn}"
-    name:                                       "foo-foobar-default"
-    placement_strategy.#:                       "2"
-    placement_strategy.2093792364.field:        "attribute:ecs.availability-zone"
-    placement_strategy.2093792364.type:         "spread"
-    placement_strategy.3946258308.field:        "instanceId"
-    placement_strategy.3946258308.type:         "spread"
-    task_definition:                            "${var.task_definition}"
+    cluster:                                   "default"
+    deployment_maximum_percent:                "200"
+    deployment_minimum_healthy_percent:        "100"
+    desired_count:                             "1"
         """.strip() in output # noqa
+
+        assert """
+    name:                                      "foo-foobar-default"
+        """.strip() in output # noqa
+
+        assert re.search(template_to_re("""
+    placement_strategy.#:                      "2"
+    placement_strategy.{ident1}.field:       "attribute:ecs.availability-zone"
+    placement_strategy.{ident1}.type:        "spread"
+    placement_strategy.{ident2}.field:       "instanceId"
+    placement_strategy.{ident2}.type:        "spread"
+        """.strip()), output) # noqa
 
     def test_create_public_alb_in_public_subnets(self):
         # When
@@ -176,7 +209,7 @@ Plan: 10 to add, 0 to change, 0 to destroy.
         )
 
         # Then
-        assert """
+        assert re.search(template_to_re("""
 + module.frontend_router.alb.aws_alb.alb
     arn:                        "<computed>"
     arn_suffix:                 "<computed>"
@@ -188,12 +221,12 @@ Plan: 10 to add, 0 to change, 0 to destroy.
     name:                       "foo-foobar-router"
     security_groups.#:          "<computed>"
     subnets.#:                  "3"
-    subnets.3082459916:         "subnet-55555555"
-    subnets.3586363601:         "subnet-33333333"
-    subnets.4231620278:         "subnet-44444444"
+    subnets.{ident1}:         "subnet-55555555"
+    subnets.{ident2}:         "subnet-33333333"
+    subnets.{ident3}:         "subnet-44444444"
     vpc_id:                     "<computed>"
     zone_id:                    "<computed>"
-        """.strip() in output # noqa
+        """.strip()), output) # noqa
 
     def test_create_public_alb_listener(self):
         # When
@@ -252,32 +285,32 @@ Plan: 10 to add, 0 to change, 0 to destroy.
         )
 
         # Then
-        assert """
+        assert re.search(template_to_re("""
 + module.frontend_router.alb.aws_security_group.default
     description:                           "Managed by Terraform"
     egress.#:                              "1"
-    egress.482069346.cidr_blocks.#:        "1"
-    egress.482069346.cidr_blocks.0:        "0.0.0.0/0"
-    egress.482069346.from_port:            "0"
-    egress.482069346.ipv6_cidr_blocks.#:   "0"
-    egress.482069346.prefix_list_ids.#:    "0"
-    egress.482069346.protocol:             "-1"
-    egress.482069346.security_groups.#:    "0"
-    egress.482069346.self:                 "false"
-    egress.482069346.to_port:              "0"
+    egress.{ident1}.cidr_blocks.#:        "1"
+    egress.{ident1}.cidr_blocks.0:        "0.0.0.0/0"
+    egress.{ident1}.from_port:            "0"
+    egress.{ident1}.ipv6_cidr_blocks.#:   "0"
+    egress.{ident1}.prefix_list_ids.#:    "0"
+    egress.{ident1}.protocol:             "-1"
+    egress.{ident1}.security_groups.#:    "0"
+    egress.{ident1}.self:                 "false"
+    egress.{ident1}.to_port:              "0"
     ingress.#:                             "1"
-    ingress.2617001939.cidr_blocks.#:      "1"
-    ingress.2617001939.cidr_blocks.0:      "0.0.0.0/0"
-    ingress.2617001939.from_port:          "443"
-    ingress.2617001939.ipv6_cidr_blocks.#: "0"
-    ingress.2617001939.protocol:           "tcp"
-    ingress.2617001939.security_groups.#:  "0"
-    ingress.2617001939.self:               "false"
-    ingress.2617001939.to_port:            "443"
+    ingress.{ident2}.cidr_blocks.#:      "1"
+    ingress.{ident2}.cidr_blocks.0:      "0.0.0.0/0"
+    ingress.{ident2}.from_port:          "443"
+    ingress.{ident2}.ipv6_cidr_blocks.#: "0"
+    ingress.{ident2}.protocol:           "tcp"
+    ingress.{ident2}.security_groups.#:  "0"
+    ingress.{ident2}.self:               "false"
+    ingress.{ident2}.to_port:            "443"
     name:                                  "<computed>"
     owner_id:                              "<computed>"
     vpc_id:                                "vpc-12345678"
-        """.strip() in output # noqa
+        """.strip()), output) # noqa
 
     def test_create_fastly_config(self):
         # When
@@ -301,94 +334,373 @@ Plan: 10 to add, 0 to change, 0 to destroy.
         )
 
         # Then
-        assert """
+        assert re.search(template_to_re("""
 + module.frontend_router.fastly.fastly_service_v1.fastly
-    active_version:                               "<computed>"
-    backend.#:                                    "1"
-    backend.~1395854901.address:                  "${var.backend_address}"
-    backend.~1395854901.auto_loadbalance:         "true"
-    backend.~1395854901.between_bytes_timeout:    "30000"
-    backend.~1395854901.connect_timeout:          "5000"
-    backend.~1395854901.error_threshold:          "0"
-    backend.~1395854901.first_byte_timeout:       "60000"
-    backend.~1395854901.healthcheck:              ""
-    backend.~1395854901.max_conn:                 "200"
-    backend.~1395854901.name:                     "default backend"
-    backend.~1395854901.port:                     "443"
-    backend.~1395854901.request_condition:        ""
-    backend.~1395854901.shield:                   ""
-    backend.~1395854901.ssl_cert_hostname:        ""
-    backend.~1395854901.ssl_check_cert:           "true"
-    backend.~1395854901.ssl_hostname:             ""
-    backend.~1395854901.ssl_sni_hostname:         ""
-    backend.~1395854901.weight:                   "100"
-    condition.#:                                  "2"
-    condition.212367000.name:                     "all_urls"
-    condition.212367000.priority:                 "10"
-    condition.212367000.statement:                "req.url ~ \\".*\\""
-    condition.212367000.type:                     "REQUEST"
-    condition.820439921.name:                     "override-robots.txt-condition"
-    condition.820439921.priority:                 "5"
-    condition.820439921.statement:                "req.url ~ \\"^/robots.txt\\""
-    condition.820439921.type:                     "REQUEST"
-    default_host:                                 "foo-www.externaldomain.com"
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
+    default_host:                                 "foo-externaldomain.com"
     default_ttl:                                  "60"
-    domain.#:                                     "2"
-    domain.1864502246.comment:                    ""
-    domain.1864502246.name:                       "foo-www.externaldomain.com"
-    domain.4243527184.comment:                    ""
-    domain.4243527184.name:                       "foo.externaldomain.com"
-    force_destroy:                                "true"
+    domain.#:                                     "1"
+    domain.{ident}.comment:                    ""
+    domain.{ident}.name:                       "foo-externaldomain.com"
+        """.strip()), output) # noqa
+
+    def test_create_fastly_config_backend(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=foo',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'aws_region=eu-west-1',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color'
+        ] + self._target_module('frontend_router') + [
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
+
+        # Then
+        assert re.search(template_to_re("""
+    backend.~{ident}.auto_loadbalance:         "true"
+    backend.~{ident}.between_bytes_timeout:    "30000"
+    backend.~{ident}.connect_timeout:          "5000"
+    backend.~{ident}.error_threshold:          "0"
+    backend.~{ident}.first_byte_timeout:       "60000"
+    backend.~{ident}.healthcheck:              ""
+    backend.~{ident}.max_conn:                 "200"
+    backend.~{ident}.name:                     "default backend"
+    backend.~{ident}.port:                     "443"
+    backend.~{ident}.request_condition:        ""
+    backend.~{ident}.shield:                   ""
+    backend.~{ident}.ssl_cert_hostname:        ""
+    backend.~{ident}.ssl_check_cert:           "true"
+    backend.~{ident}.ssl_hostname:             ""
+    backend.~{ident}.ssl_sni_hostname:         ""
+    backend.~{ident}.weight:                   "100"
+        """.strip()), output) # noqa
+
+    def test_create_fastly_config_all_urls_condition(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=foo',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'aws_region=eu-west-1',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color'
+        ] + self._target_module('frontend_router') + [
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
+
+        # Then
+        assert re.search(template_to_re("""
+    condition.{ident}.name:                     "all_urls"
+    condition.{ident}.priority:                 "10"
+    condition.{ident}.statement:                "req.url ~ \\".*\\""
+    condition.{ident}.type:                     "REQUEST"
+        """.strip()), output) # noqa
+
+    def test_create_fastly_config_response_503_condition(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=foo',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'aws_region=eu-west-1',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color'
+        ] + self._target_module('frontend_router') + [
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
+
+        # Then
+        assert re.search(template_to_re("""
+    condition.{ident}.name:                    "response-503-condition"
+    condition.{ident}.priority:                "5"
+    condition.{ident}.statement:               "beresp.status == 503"
+    condition.{ident}.type:                    "CACHE"
+        """.strip()), output) # noqa
+
+    def test_create_fastly_config_response_503_definition(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=foo',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'aws_region=eu-west-1',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color'
+        ] + self._target_module('frontend_router') + [
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
+
+        # Then
+        assert re.search(template_to_re("""
+    response_object.{ident}.cache_condition:   "response-503-condition"
+    response_object.{ident}.content:           "<!DOCTYPE html>
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
+    <title>503 Service Unavailable</title>
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
+    response_object.{ident}.content_type:      "text/html"
+    response_object.{ident}.name:              "error-response-503"
+    response_object.{ident}.request_condition: ""
+    response_object.{ident}.response:          "Service Unavailable"
+    response_object.{ident}.status:            "503"
+        """.strip()), output) # noqa
+
+    def test_create_fastly_config_default_caching_ssl_setting(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=foo',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'aws_region=eu-west-1',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color'
+        ] + self._target_module('frontend_router') + [
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
+
+        # Then
+        assert re.search(template_to_re("""
+    request_setting.{ident}.action:            ""
+    request_setting.{ident}.bypass_busy_wait:  ""
+    request_setting.{ident}.default_host:      ""
+    request_setting.{ident}.force_miss:        "false"
+    request_setting.{ident}.force_ssl:         "true"
+    request_setting.{ident}.geo_headers:       ""
+    request_setting.{ident}.hash_keys:         ""
+    request_setting.{ident}.max_stale_age:     "60"
+    request_setting.{ident}.name:              "disable caching"
+    request_setting.{ident}.request_condition: "all_urls"
+    request_setting.{ident}.timer_support:     ""
+    request_setting.{ident}.xff:               "append"
+        """.strip()), output) # noqa
+
+    def test_create_fastly_config_headers_obfuscation(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=foo',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'aws_region=eu-west-1',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color'
+        ] + self._target_module('frontend_router') + [
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
+
+        # Then
+        assert re.search(template_to_re("""
+    header.{ident1}.action:                     "delete"
+    header.{ident1}.cache_condition:            ""
+    header.{ident1}.destination:                "http.X-Powered-By"
+    header.{ident1}.ignore_if_set:              "false"
+    header.{ident1}.name:                       "Remove X-Powered-By header"
+    header.{ident1}.priority:                   "100"
+    header.{ident1}.regex:                      "<computed>"
+    header.{ident1}.request_condition:          ""
+    header.{ident1}.response_condition:         ""
+    header.{ident1}.source:                     "<computed>"
+    header.{ident1}.substitution:               "<computed>"
+    header.{ident1}.type:                       "cache"
+    header.{ident2}.action:                     "set"
+    header.{ident2}.cache_condition:            ""
+    header.{ident2}.destination:                "http.Server"
+    header.{ident2}.ignore_if_set:              "false"
+    header.{ident2}.name:                       "Obfuscate Server header"
+    header.{ident2}.priority:                   "100"
+    header.{ident2}.regex:                      "<computed>"
+    header.{ident2}.request_condition:          ""
+    header.{ident2}.response_condition:         ""
+    header.{ident2}.source:                     "\\"LHC\\""
+    header.{ident2}.substitution:               "<computed>"
+    header.{ident2}.type:                       "cache"
+        """.strip()), output) # noqa
+
+    def test_create_fastly_config_override_robots_txt_condition(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=foo',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'aws_region=eu-west-1',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color'
+        ] + self._target_module('frontend_router') + [
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
+
+        # Then
+        assert re.search(template_to_re("""
+    condition.{ident}.name:                     "override-robots.txt-condition"
+    condition.{ident}.priority:                 "5"
+    condition.{ident}.statement:                "req.url ~ \\"^/robots.txt\\""
+    condition.{ident}.type:                     "REQUEST"
+        """.strip()), output) # noqa
+
+    def test_create_fastly_config_response_502_condition(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=foo',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'aws_region=eu-west-1',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color'
+        ] + self._target_module('frontend_router') + [
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
+
+        # Then
+        assert re.search(template_to_re("""
+    condition.{ident}.name:                    "response-502-condition"
+    condition.{ident}.priority:                "5"
+    condition.{ident}.statement:               "beresp.status == 502"
+    condition.{ident}.type:                    "CACHE"
+        """.strip()), output) # noqa
+
+    def test_create_fastly_config_response_502_definition(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=foo',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'aws_region=eu-west-1',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color'
+        ] + self._target_module('frontend_router') + [
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
+
+        # Then
+        assert re.search(template_to_re("""
+    response_object.{ident}.cache_condition:   "response-502-condition"
+    response_object.{ident}.content:           "<!DOCTYPE html>
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
+    <h1>Bad Gateway (502)</h1>
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
+    response_object.{ident}.content_type:      "text/html"
+    response_object.{ident}.name:              "error-response-502"
+    response_object.{ident}.request_condition: ""
+    response_object.{ident}.response:          "Bad Gateway"
+    response_object.{ident}.status:            "502"
+        """.strip()), output) # noqa
+
+    def test_create_fastly_config_gzip_configuration(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=foo',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'aws_region=eu-west-1',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color'
+        ] + self._target_module('frontend_router') + [
+            self.module_path
+        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
+
+        # Then
+        assert re.search(template_to_re("""
     gzip.#:                                       "1"
-    gzip.2425354137.cache_condition:              ""
-    gzip.2425354137.content_types.#:              "3"
-    gzip.2425354137.content_types.2372034088:     "application/json"
-    gzip.2425354137.content_types.366283795:      "text/css"
-    gzip.2425354137.content_types.4008173114:     "text/html"
-    gzip.2425354137.extensions.#:                 "2"
-    gzip.2425354137.extensions.253252853:         "js"
-    gzip.2425354137.extensions.3950613225:        "css"
-    gzip.2425354137.name:                         "file extensions and content types"
-    header.#:                                     "2"
-    header.2180504608.action:                     "delete"
-    header.2180504608.cache_condition:            ""
-    header.2180504608.destination:                "http.X-Powered-By"
-    header.2180504608.ignore_if_set:              "false"
-    header.2180504608.name:                       "Remove X-Powered-By header"
-    header.2180504608.priority:                   "100"
-    header.2180504608.regex:                      "<computed>"
-    header.2180504608.request_condition:          ""
-    header.2180504608.response_condition:         ""
-    header.2180504608.source:                     "<computed>"
-    header.2180504608.substitution:               "<computed>"
-    header.2180504608.type:                       "cache"
-    header.3700817666.action:                     "set"
-    header.3700817666.cache_condition:            ""
-    header.3700817666.destination:                "http.Server"
-    header.3700817666.ignore_if_set:              "false"
-    header.3700817666.name:                       "Obfuscate Server header"
-    header.3700817666.priority:                   "100"
-    header.3700817666.regex:                      "<computed>"
-    header.3700817666.request_condition:          ""
-    header.3700817666.response_condition:         ""
-    header.3700817666.source:                     "\\"LHC\\""
-    header.3700817666.substitution:               "<computed>"
-    header.3700817666.type:                       "cache"
-    name:                                         "foo-externaldomain.com"
-    request_setting.#:                            "1"
-    request_setting.4061384956.action:            ""
-    request_setting.4061384956.bypass_busy_wait:  ""
-    request_setting.4061384956.default_host:      ""
-    request_setting.4061384956.force_miss:        "false"
-    request_setting.4061384956.force_ssl:         "true"
-    request_setting.4061384956.geo_headers:       ""
-    request_setting.4061384956.hash_keys:         ""
-    request_setting.4061384956.max_stale_age:     "60"
-    request_setting.4061384956.name:              "disable caching"
-    request_setting.4061384956.request_condition: "all_urls"
-    request_setting.4061384956.timer_support:     ""
-    request_setting.4061384956.xff:               "append"
-        """.strip() in output # noqa
+    gzip.{ident}.cache_condition:              ""
+    gzip.{ident}.content_types.#:              "3"
+    gzip.{ident}.content_types.2372034088:     "application/json"
+    gzip.{ident}.content_types.366283795:      "text/css"
+    gzip.{ident}.content_types.4008173114:     "text/html"
+    gzip.{ident}.extensions.#:                 "2"
+    gzip.{ident}.extensions.253252853:         "js"
+    gzip.{ident}.extensions.3950613225:        "css"
+    gzip.{ident}.name:                         "file extensions and content types"
+        """.strip()), output) # noqa
 
     def test_create_fastly_config_disable_fastly_caching(self):
         # When
@@ -416,21 +728,21 @@ Plan: 10 to add, 0 to change, 0 to destroy.
 + module.frontend_router_disable_fastly_caching.fastly.fastly_service_v1.fastly
         """.strip() in output # noqa
 
-        assert """
+        assert re.search(template_to_re("""
     request_setting.#:                            "1"
-    request_setting.2432135539.action:            ""
-    request_setting.2432135539.bypass_busy_wait:  ""
-    request_setting.2432135539.default_host:      ""
-    request_setting.2432135539.force_miss:        "true"
-    request_setting.2432135539.force_ssl:         "true"
-    request_setting.2432135539.geo_headers:       ""
-    request_setting.2432135539.hash_keys:         ""
-    request_setting.2432135539.max_stale_age:     "60"
-    request_setting.2432135539.name:              "disable caching"
-    request_setting.2432135539.request_condition: "all_urls"
-    request_setting.2432135539.timer_support:     ""
-    request_setting.2432135539.xff:               "append"
-        """.strip() in output # noqa
+    request_setting.{ident}.action:            ""
+    request_setting.{ident}.bypass_busy_wait:  ""
+    request_setting.{ident}.default_host:      ""
+    request_setting.{ident}.force_miss:        "true"
+    request_setting.{ident}.force_ssl:         "true"
+    request_setting.{ident}.geo_headers:       ""
+    request_setting.{ident}.hash_keys:         ""
+    request_setting.{ident}.max_stale_age:     "60"
+    request_setting.{ident}.name:              "disable caching"
+    request_setting.{ident}.request_condition: "all_urls"
+    request_setting.{ident}.timer_support:     ""
+    request_setting.{ident}.xff:               "append"
+        """.strip()), output) # noqa
 
     @given(
         env=sampled_from(('ci', 'dev', 'aslive', 'live')),
@@ -471,27 +783,9 @@ Plan: 10 to add, 0 to change, 0 to destroy.
     internal:                   "false"
     ip_address_type:            "<computed>"
     name:                       "{name}-router"
-    security_groups.#:          "<computed>"
-    subnets.#:                  "1"
-    subnets.939944885:          "subnet-33333333,subnet-44444444,subnet-55555555"
-    vpc_id:                     "<computed>"
-    zone_id:                    "<computed>"
         """.format(name=env_component_name[:23]).strip() in output # noqa
 
         assert """
-+ module.frontend_router.default_backend_ecs_service.aws_alb_target_group.target_group
-    arn:                                "<computed>"
-    arn_suffix:                         "<computed>"
-    deregistration_delay:               "10"
-    health_check.#:                     "1"
-    health_check.0.healthy_threshold:   "2"
-    health_check.0.interval:            "5"
-    health_check.0.matcher:             "200-299"
-    health_check.0.path:                "/internal/healthcheck"
-    health_check.0.port:                "traffic-port"
-    health_check.0.protocol:            "HTTP"
-    health_check.0.timeout:             "4"
-    health_check.0.unhealthy_threshold: "2"
     name:                               "{name}-default"
     port:                               "31337"
     protocol:                           "HTTP"
