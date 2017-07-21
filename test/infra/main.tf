@@ -28,15 +28,29 @@ module "frontend_router" {
 module "frontend_router_disable_fastly_caching" {
   source = "../.."
 
-  fastly_domain   = "${var.fastly_domain}"
-  alb_domain      = "${var.alb_domain}"
-  team            = "${var.team}"
-  env             = "${var.env}"
-  component       = "${var.component}"
-  platform_config = "${var.platform_config}"
+  fastly_domain         = "${var.fastly_domain}"
+  alb_domain            = "${var.alb_domain}"
+  team                  = "${var.team}"
+  env                   = "${var.env}"
+  component             = "${var.component}"
+  platform_config       = "${var.platform_config}"
 
   # optional
   fastly_caching = "false"
+}
+
+module "frontend_router_timeouts" {
+  source = "../.."
+
+  fastly_domain         = "${var.fastly_domain}"
+  alb_domain            = "${var.alb_domain}"
+  team                  = "${var.team}"
+  env                   = "${var.env}"
+  component             = "${var.component}"
+  platform_config       = "${var.platform_config}"
+  connect_timeout       = "${var.connect_timeout}"
+  first_byte_timeout    = "${var.first_byte_timeout}"
+  between_bytes_timeout = "${var.between_bytes_timeout}"
 }
 
 # variables
@@ -58,3 +72,20 @@ variable "platform_config" {
   type = "map"
 }
 
+variable "connect_timeout" {
+  type        = "string"
+  description = ""
+  default     = 5000
+}
+
+variable "first_byte_timeout" {
+  type        = "string"
+  description = ""
+  default     = 60000
+}
+
+variable "between_bytes_timeout" {
+  type        = "string"
+  description = ""
+  default     = 30000
+}

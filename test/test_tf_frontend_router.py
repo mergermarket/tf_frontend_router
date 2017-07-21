@@ -792,3 +792,39 @@ Plan: 10 to add, 0 to change, 0 to destroy.
     stickiness.#:                       "<computed>"
     vpc_id:                             "vpc-12345678"
         """.format(name=env_component_name[:23]).strip() in output # noqa
+
+    def test_custom_timeouts(self):
+        # When
+        output = check_output([
+              'terraform',
+              'plan',
+              '-var', 'env=foo',
+              '-var', 'component=foobar',
+              '-var', 'team=foobar',
+              '-var', 'aws_region=eu-west-1',
+              '-var', 'fastly_domain=externaldomain.com',
+              '-var', 'alb_domain=domain.com',
+              '-var', 'connect_timeout=12345',
+              '-var', 'first_byte_timeout=54321',
+              '-var', 'between_bytes_timeout=31337',
+              '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                  self.base_path
+              ),
+              '-no-color'
+          ] + self._target_module('frontend_router_timeouts') + [
+              self.module_path
+          ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
+            'utf-8'
+        )
+
+        # Then
+        assert """
++ module.frontend_router_timeouts.fastly.fastly_service_v1.fastly
+        """.strip() in output # noqa
+
+        assert re.search(template_to_re("""
+    backend.{ident}.between_bytes_timeout:     "31337"
+    backend.{ident}.connect_timeout:           "12345"
+    backend.{ident}.error_threshold:           "0"
+    backend.{ident}.first_byte_timeout:        "54321"
+        """.strip()), output) # noqa
