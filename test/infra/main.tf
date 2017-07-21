@@ -34,9 +34,6 @@ module "frontend_router_disable_fastly_caching" {
   env                   = "${var.env}"
   component             = "${var.component}"
   platform_config       = "${var.platform_config}"
-  connect_timeout       = "${var.connect_timeout}"
-  first_byte_timeout    = "${var.first_byte_timeout}"
-  between_bytes_timeout = "${var.between_bytes_timeout}"
 
   # optional
   fastly_caching = "false"
