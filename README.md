@@ -1,6 +1,8 @@
 Frontend Router terraform module
 ================================
 
+[![Build Status](https://travis-ci.org/mergermarket/tf_frontend_router.svg?branch=master)](https://travis-ci.org/mergermarket/tf_frontend_router)
+
 This modules crates components needed to be able to expose your application(s) to the public.
 
 When included and configured this module will:
