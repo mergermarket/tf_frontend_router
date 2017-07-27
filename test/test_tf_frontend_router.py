@@ -473,7 +473,7 @@ Plan: 11 to add, 0 to change, 0 to destroy.
         """.strip()), output) # noqa
 
         assert re.search(template_to_re("""
-    <title>503 Service Unavailable</title>
+    <title>Service Unavailable</title>
         """.strip()), output) # noqa
 
         assert re.search(template_to_re("""
@@ -656,7 +656,7 @@ Plan: 11 to add, 0 to change, 0 to destroy.
         """.strip()), output) # noqa
 
         assert re.search(template_to_re("""
-    <h1>Bad Gateway (502)</h1>
+    <h1>Service Unavailable</h1>
         """.strip()), output) # noqa
 
         assert re.search(template_to_re("""
