@@ -27,6 +27,11 @@ variable "platform_config" {
   default     = {}
 }
 
+variable "le_logset_id" {
+  description = "Logentries Logset ID"
+  type        = "string"
+}
+
 # optional
 variable "alb_domain" {
   description = ""
