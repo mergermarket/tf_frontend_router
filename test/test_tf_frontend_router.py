@@ -101,7 +101,7 @@ class TestTFFrontendRouter(unittest.TestCase):
 
         # Then
         assert """
-Plan: 12 to add, 0 to change, 0 to destroy.
+Plan: 13 to add, 0 to change, 0 to destroy.
         """.strip() in output
 
     def test_create_default_404_service_target_group(self):
@@ -227,6 +227,10 @@ Plan: 12 to add, 0 to change, 0 to destroy.
       subnets.{ident1}:         "subnet-55555555"
       subnets.{ident2}:         "subnet-33333333"
       subnets.{ident3}:         "subnet-44444444"
+      tags.%:                     "3"
+      tags.component:             "foobar"
+      tags.environment:           "foo"
+      tags.team:                  "foobar"
       vpc_id:                     "<computed>"
       zone_id:                    "<computed>"
         """.strip()), output) # noqa
