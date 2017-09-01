@@ -51,7 +51,6 @@ class TestTFFrontendRouter(unittest.TestCase):
         self.module_path = os.path.join(os.getcwd(), 'test', 'infra')
 
         check_call(['terraform', 'init', self.module_path], cwd=self.workdir)
-        check_call(['terraform', 'get', self.module_path], cwd=self.workdir)
 
     def tearDown(self):
         if os.path.isdir(self.workdir):
