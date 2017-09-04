@@ -85,7 +85,6 @@ class TestTFFrontendRouter(unittest.TestCase):
             '-var', 'env=dev',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -111,7 +110,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -154,7 +152,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -197,7 +194,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -242,7 +238,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -277,7 +272,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -326,7 +320,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -360,7 +353,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -397,7 +389,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -426,7 +417,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -455,7 +445,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -494,7 +483,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -531,7 +519,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -580,7 +567,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -609,7 +595,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -638,7 +623,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -677,7 +661,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -712,7 +695,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=foo',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -761,7 +743,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env={}'.format(env),
             '-var', 'component={}'.format(component),
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -803,7 +784,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
               '-var', 'env=foo',
               '-var', 'component=foobar',
               '-var', 'team=foobar',
-              '-var', 'aws_region=eu-west-1',
               '-var', 'fastly_domain=externaldomain.com',
               '-var', 'alb_domain=domain.com',
               '-var', 'connect_timeout=12345',
@@ -841,7 +821,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var', 'env=dev',
             '-var', 'component=foobar',
             '-var', 'team=foobar',
-            '-var', 'aws_region=eu-west-1',
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(

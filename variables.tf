@@ -4,11 +4,6 @@ variable "fastly_domain" {
   type        = "string"
 }
 
-variable "aws_region" {
-  description = "AWS Region"
-  default     = "eu-west-1"
-}
-
 variable "env" {
   description = "Environment name"
 }
