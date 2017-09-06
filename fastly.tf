@@ -4,7 +4,6 @@ module "fastly" {
   domain_name           = "${var.fastly_domain}"
   backend_address       = "${module.alb.alb_dns_name}"
   env                   = "${var.env}"
-  le_logset_id          = "${var.le_logset_id}"
   caching               = "${var.fastly_caching}"
   ssl_cert_check        = "${var.ssl_cert_check}"
   ssl_cert_hostname     = "${var.ssl_cert_hostname}"
