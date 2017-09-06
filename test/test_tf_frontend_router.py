@@ -869,7 +869,9 @@ Plan: 13 to add, 0 to change, 0 to destroy.
 
         assert """
   + module.frontend_router.module.fastly.logentries_log.logs
-      logset_id:        "123"
+        """.strip() in output # noqa
+
+        assert """
       name:             "dev-externaldomain.com"
       retention_period: "ACCOUNT_DEFAULT"
       source:           "token"
