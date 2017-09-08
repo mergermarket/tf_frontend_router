@@ -43,14 +43,14 @@ module "default_backend_ecs_service" {
 }
 
 module "alb" {
-  source = "github.com/mergermarket/tf_alb"
+  source = "github.com/mergermarket/tf_alb.git"
 
   name                     = "${join("", slice(split("", format("%s-%s", var.env, var.component)), 0, length(format("%s-%s", var.env, var.component)) > 22 ? 23 : length(format("%s-%s", var.env, var.component))))}-router"
   vpc_id                   = "${var.platform_config["vpc"]}"
   subnet_ids               = ["${split(",", var.platform_config["public_subnets"])}"]
   extra_security_groups    = ["${var.platform_config["ecs_cluster.default.client_security_group"]}"]
   internal                 = "false"
-  certificate_arn          = "${var.platform_config["elb_certificates.${replace(var.alb_domain, "/\\./", "_")}"]}"
+  certificate_domain_name  = "${format("*.%s%s", var.env != "live" ? "dev." : "", var.alb_domain)}"
   default_target_group_arn = "${module.default_backend_ecs_service.target_group_arn}"
 
   tags = {

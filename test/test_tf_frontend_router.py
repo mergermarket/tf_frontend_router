@@ -91,12 +91,17 @@ class TestTFFrontendRouter(unittest.TestCase):
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.default_backend_ecs_service', # noqa
+            '-target=module.frontend_router.module.404_container_definition', # noqa
+            '-target=module.frontend_router.module.haproxy_proxy_container_definition', # noqa
+            '-target=module.frontend_router.module.default_backend_task_definition', # noqa
+            '-target=module.frontend_router.module.default_backend_ecs_service', # noqa
+            '-target=module.frontend_router.module.alb.aws_alb.alb', # noqa
+            '-target=module.frontend_router.module.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert """
@@ -117,33 +122,33 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.default_backend_ecs_service', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
   + module.frontend_router.module.default_backend_ecs_service.aws_alb_target_group.target_group
-      arn:                                "<computed>"
-      arn_suffix:                         "<computed>"
-      deregistration_delay:               "10"
-      health_check.#:                     "1"
-      health_check.{ident}.healthy_threshold:   "2"
-      health_check.{ident}.interval:            "5"
-      health_check.{ident}.matcher:             "200-299"
-      health_check.{ident}.path:                "/internal/healthcheck"
-      health_check.{ident}.port:                "traffic-port"
-      health_check.{ident}.protocol:            "HTTP"
-      health_check.{ident}.timeout:             "4"
-      health_check.{ident}.unhealthy_threshold: "2"
-      name:                               "foo-foobar-default"
-      port:                               "31337"
-      protocol:                           "HTTP"
-      stickiness.#:                       "<computed>"
-      vpc_id:                             "vpc-12345678"
+      id:                                        <computed>
+      arn:                                       <computed>
+      arn_suffix:                                <computed>
+      deregistration_delay:                      "10"
+      health_check.#:                            "1"
+      health_check.{ident}.healthy_threshold:          "2"
+      health_check.{ident}.interval:                   "5"
+      health_check.{ident}.matcher:                    "200-299"
+      health_check.{ident}.path:                       "/internal/healthcheck"
+      health_check.{ident}.port:                       "traffic-port"
+      health_check.{ident}.protocol:                   "HTTP"
+      health_check.{ident}.timeout:                    "4"
+      health_check.{ident}.unhealthy_threshold:        "2"
+      name:                                      "foo-foobar-default"
+      port:                                      "31337"
+      protocol:                                  "HTTP"
+      stickiness.#:                              <computed>
+      vpc_id:                                    "vpc-12345678"
         """.strip()), output) # noqa
 
     def test_create_default_404_service_ecs_service(self):
@@ -160,15 +165,15 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.default_backend_ecs_service.aws_ecs_service.service', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         assert """
   + module.frontend_router.module.default_backend_ecs_service.aws_ecs_service.service
+      id:                                        <computed>
       cluster:                                   "default"
       deployment_maximum_percent:                "200"
       deployment_minimum_healthy_percent:        "100"
@@ -203,35 +208,35 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.alb.aws_alb.alb', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
-  + module.frontend_router.module.alb.aws_alb.alb
-      arn:                        "<computed>"
-      arn_suffix:                 "<computed>"
-      dns_name:                   "<computed>"
-      enable_deletion_protection: "false"
-      idle_timeout:               "60"
-      internal:                   "false"
-      ip_address_type:            "<computed>"
-      name:                       "foo-foobar-router"
-      security_groups.#:          "<computed>"
-      subnets.#:                  "3"
-      subnets.{ident1}:         "subnet-55555555"
-      subnets.{ident2}:         "subnet-33333333"
-      subnets.{ident3}:         "subnet-44444444"
-      tags.%:                     "3"
-      tags.component:             "foobar"
-      tags.environment:           "foo"
-      tags.team:                  "foobar"
-      vpc_id:                     "<computed>"
-      zone_id:                    "<computed>"
++ module.frontend_router.module.alb.aws_alb.alb
+      id:                                    <computed>
+      arn:                                   <computed>
+      arn_suffix:                            <computed>
+      dns_name:                              <computed>
+      enable_deletion_protection:            "false"
+      idle_timeout:                          "60"
+      internal:                              "false"
+      ip_address_type:                       <computed>
+      name:                                  "foo-foobar-router"
+      security_groups.#:                     <computed>
+      subnets.#:                             "3"
+      subnets.{ident1}:                    "subnet-55555555"
+      subnets.{ident2}:                    "subnet-33333333"
+      subnets.{ident3}:                    "subnet-44444444"
+      tags.%:                                "3"
+      tags.component:                        "foobar"
+      tags.environment:                      "foo"
+      tags.team:                             "foobar"
+      vpc_id:                                <computed>
+      zone_id:                               <computed>
         """.strip()), output) # noqa
 
     def test_create_public_alb_listener(self):
@@ -248,25 +253,26 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
+            '-target=module.frontend_router.module.alb.aws_alb_listener.https',
+            '-no-color',
             self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+        ], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert """
   + module.frontend_router.module.alb.aws_alb_listener.https
-      arn:                               "<computed>"
-      certificate_arn:                   "arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"
-      default_action.#:                  "1"
-      default_action.0.target_group_arn: "${var.default_target_group_arn}"
-      default_action.0.type:             "forward"
-      load_balancer_arn:                 "${aws_alb.alb.arn}"
-      port:                              "443"
-      protocol:                          "HTTPS"
-      ssl_policy:                        "<computed>"
+      id:                                    <computed>
+      arn:                                   <computed>
+      certificate_arn:                       "${module.aws_acm_certificate_arn.arn}"
+      default_action.#:                      "1"
+      default_action.0.target_group_arn:     "${var.default_target_group_arn}"
+      default_action.0.type:                 "forward"
+      load_balancer_arn:                     "${aws_alb.alb.arn}"
+      port:                                  "443"
+      protocol:                              "HTTPS"
+      ssl_policy:                            <computed>
         """.strip() in output # noqa
 
     def test_create_public_alb_security_group(self):
@@ -283,16 +289,16 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.alb.aws_security_group.default', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
   + module.frontend_router.module.alb.aws_security_group.default
+      id:                                    <computed>
       description:                           "Managed by Terraform"
       egress.#:                              "1"
       egress.{ident1}.cidr_blocks.#:        "1"
@@ -313,9 +319,10 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       ingress.{ident2}.security_groups.#:  "0"
       ingress.{ident2}.self:               "false"
       ingress.{ident2}.to_port:            "443"
-      name:                                  "<computed>"
-      owner_id:                              "<computed>"
+      name:                                  <computed>
+      owner_id:                              <computed>
       vpc_id:                                "vpc-12345678"
+
         """.strip()), output) # noqa
 
     def test_create_fastly_config(self):
@@ -332,12 +339,11 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
@@ -366,12 +372,11 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
@@ -403,12 +408,11 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
@@ -432,12 +436,11 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
@@ -461,12 +464,11 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
@@ -500,12 +502,11 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
@@ -537,39 +538,41 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router_timeouts.module.fastly.fastly_service_v1.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
-      header.{ident1}.action:                     "delete"
-      header.{ident1}.cache_condition:            ""
-      header.{ident1}.destination:                "http.X-Powered-By"
-      header.{ident1}.ignore_if_set:              "false"
-      header.{ident1}.name:                       "Remove X-Powered-By header"
-      header.{ident1}.priority:                   "100"
-      header.{ident1}.regex:                      "<computed>"
-      header.{ident1}.request_condition:          ""
-      header.{ident1}.response_condition:         ""
-      header.{ident1}.source:                     "<computed>"
-      header.{ident1}.substitution:               "<computed>"
-      header.{ident1}.type:                       "cache"
-      header.{ident2}.action:                     "set"
-      header.{ident2}.cache_condition:            ""
-      header.{ident2}.destination:                "http.Server"
-      header.{ident2}.ignore_if_set:              "false"
-      header.{ident2}.name:                       "Obfuscate Server header"
-      header.{ident2}.priority:                   "100"
-      header.{ident2}.regex:                      "<computed>"
-      header.{ident2}.request_condition:          ""
-      header.{ident2}.response_condition:         ""
-      header.{ident2}.source:                     "\\"LHC\\""
-      header.{ident2}.substitution:               "<computed>"
-      header.{ident2}.type:                       "cache"
+      header.{ident}.action:                      "delete"
+      header.{ident}.cache_condition:             ""
+      header.{ident}.destination:                 "http.X-Powered-By"
+      header.{ident}.ignore_if_set:               "false"
+      header.{ident}.name:                        "Remove X-Powered-By header"
+      header.{ident}.priority:                    "100"
+      header.{ident}.regex:                       <computed>
+      header.{ident}.request_condition:           ""
+      header.{ident}.response_condition:          ""
+      header.{ident}.source:                      <computed>
+      header.{ident}.substitution:                <computed>
+      header.{ident}.type:                        "cache"
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
+      header.{ident}.action:                      "set"
+      header.{ident}.cache_condition:             ""
+      header.{ident}.destination:                 "http.Server"
+      header.{ident}.ignore_if_set:               "false"
+      header.{ident}.name:                        "Obfuscate Server header"
+      header.{ident}.priority:                    "100"
+      header.{ident}.regex:                       <computed>
+      header.{ident}.request_condition:           ""
+      header.{ident}.response_condition:          ""
+      header.{ident}.source:                      "\\"LHC\\""
+      header.{ident}.substitution:                <computed>
+      header.{ident}.type:                        "cache"
         """.strip()), output) # noqa
 
     def test_create_fastly_config_override_robots_txt_condition(self):
@@ -586,12 +589,11 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
@@ -615,12 +617,11 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
@@ -644,12 +645,11 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
@@ -683,12 +683,11 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
@@ -718,12 +717,11 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router_disable_fastly_caching') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router_disable_fastly_caching.module.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert """
@@ -767,32 +765,24 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router.module.alb.aws_alb.alb', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert """
-  + module.frontend_router.module.alb.aws_alb.alb
-      arn:                        "<computed>"
-      arn_suffix:                 "<computed>"
-      dns_name:                   "<computed>"
-      enable_deletion_protection: "false"
-      idle_timeout:               "60"
-      internal:                   "false"
-      ip_address_type:            "<computed>"
-      name:                       "{name}-router"
-        """.format(name=env_component_name[:23]).strip() in output # noqa
-
-        assert """
-      name:                               "{name}-default"
-      port:                               "31337"
-      protocol:                           "HTTP"
-      stickiness.#:                       "<computed>"
-      vpc_id:                             "vpc-12345678"
++ module.frontend_router.module.alb.aws_alb.alb
+      id:                                    <computed>
+      arn:                                   <computed>
+      arn_suffix:                            <computed>
+      dns_name:                              <computed>
+      enable_deletion_protection:            "false"
+      idle_timeout:                          "60"
+      internal:                              "false"
+      ip_address_type:                       <computed>
+      name:                                  "{name}-router"
         """.format(name=env_component_name[:23]).strip() in output # noqa
 
     def test_custom_timeouts(self):
@@ -812,12 +802,11 @@ Plan: 13 to add, 0 to change, 0 to destroy.
               '-var-file={}/test/platform-config/eu-west-1.json'.format(
                   self.base_path
               ),
-              '-no-color'
-          ] + self._target_module('frontend_router_timeouts') + [
-              self.module_path
-          ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode( #noqa
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router_timeouts.module.fastly.fastly_service_v1.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert """
@@ -825,10 +814,10 @@ Plan: 13 to add, 0 to change, 0 to destroy.
         """.strip() in output # noqa
 
         assert re.search(template_to_re("""
-      backend.~{ident}.between_bytes_timeout:    "31337"
-      backend.~{ident}.connect_timeout:          "12345"
-      backend.~{ident}.error_threshold:          "0"
-      backend.~{ident}.first_byte_timeout:       "54321"
+      backend.~{ident}.between_bytes_timeout:     "31337"
+      backend.~{ident}.connect_timeout:           "12345"
+      backend.~{ident}.error_threshold:           "0"
+      backend.~{ident}.first_byte_timeout:        "54321"
         """.strip()), output) # noqa
 
     def test_fastly_logging_config(self):
@@ -847,33 +836,29 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
                 self.base_path
             ),
-            '-no-color'
-        ] + self._target_module('frontend_router') + [
-            self.module_path
-        ], env=self._env_for_check_output('qwerty'), cwd=self.workdir).decode(
-            'utf-8'
-        )
+            '-no-color',
+            '-target=module.frontend_router_timeouts.module.fastly.fastly_service_v1.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
 
         # Then
         assert re.search(template_to_re("""
-      logentries.#:                                 "1"
-      logentries.~{ident}.format:                "%h %l %u %t %r %>s"
-      logentries.~{ident}.name:                  "dev-externaldomain.com"
-      logentries.~{ident}.port:                  "20000"
-      logentries.~{ident}.response_condition:    ""
-        """.strip()), output) # noqa
-
-        assert re.search(template_to_re("""
-      logentries.~{ident}.use_tls:               "true"
+      logentries.#:                                  "1"
+      logentries.~{ident}.format:                 "%h %l %u %t %r %>s"
+      logentries.~{ident}.name:                   "dev-externaldomain.com"
+      logentries.~{ident}.port:                   "20000"
+      logentries.~{ident}.response_condition:     ""
         """.strip()), output) # noqa
 
         assert """
-  + module.frontend_router.module.fastly.logentries_log.logs
+  + module.frontend_router_timeouts.module.fastly.logentries_log.logs
+      id:                                            <computed>
         """.strip() in output # noqa
 
         assert """
-      name:             "dev-externaldomain.com"
-      retention_period: "ACCOUNT_DEFAULT"
-      source:           "token"
-      token:            "<computed>"
+      name:                                          "dev-externaldomain.com"
+      retention_period:                              "ACCOUNT_DEFAULT"
+      source:                                        "token"
+      token:                                         <computed>
         """.strip() in output # noqa
