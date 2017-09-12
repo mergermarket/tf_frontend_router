@@ -20,7 +20,6 @@ Module Input Variables
 ----------------------
 
 - `fastly_domain` - (string) - **REQUIRED** - DNS Domain name to be used as a entry to the service (Fastly will be configured to use it)
-- `le_logset_id` - (string) - **REQUIRED** - Logentries Logset ID under which Logs will be sent to (provided by platform config)
 - `team` - (string) - **REQUIRED** - Name of Team deploying the ALB - will affect ALBs name
 - `env` - (string) - **REQUIRED** - Environment deployed to
 - `component` - (string) - **REQUIRED** - component name
