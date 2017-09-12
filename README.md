@@ -24,7 +24,7 @@ Module Input Variables
 - `env` - (string) - **REQUIRED** - Environment deployed to
 - `component` - (string) - **REQUIRED** - component name
 - `platform_config` - (map) **REQUIRED** - Mergermarket Platform config dictionary (see tests for example one)
-- `alb_domain` - (string) - DNS Domain name to be used as a entry to the service (Fastly will be configured to use it)
+- `alb_domain` - (string) - **REQUIRED** DNS Domain name to be used as a entry to the service (Fastly will be configured to use it)
 - `backend_ip` - (string) - If set to IP - it'll cause a proxying service to be deployed that will proxy - by default - all requests to given IP; this IP should be / can be different per environment and configured via `config` mechanism.  Default `404` - will deploy service that - by default - returns 404s to all requests
 - `fastly_caching` - (bool) - Controls whether to enable / forcefully disable caching (default: true)
 - `ssl_cert_check` - (bool) - Check the backend cert is valid - warning disabling this makes you vulnerable to a man-in-the-middle imporsonating your backend (default `true`)
