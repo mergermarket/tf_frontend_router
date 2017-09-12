@@ -27,13 +27,12 @@ variable "platform_config" {
   default     = {}
 }
 
-# optional
 variable "alb_domain" {
   description = ""
   type        = "string"
-  default     = "mmgapi.net"
 }
 
+# optional
 variable "backend_ip" {
   description = "Backend to route all requests by default to; default: 404 (see README)"
   type        = "string"
