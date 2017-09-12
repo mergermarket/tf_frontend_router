@@ -29,6 +29,12 @@ Module Input Variables
 - `fastly_caching` - (bool) - Controls whether to enable / forcefully disable caching (default: true)
 - `ssl_cert_check` - (bool) - Check the backend cert is valid - warning disabling this makes you vulnerable to a man-in-the-middle imporsonating your backend (default `true`)
 - `ssl_cert_hostname` - (bool) - The hostname to validate the certificate presented by the backend against (default `""`)
+- `health_check_interval` - (string) - (default "5") The approximate amount of time, in seconds, between health checks of an individual target. Minimum value 5 seconds, Maximum value 300 seconds.
+- `health_check_path` - (string) - The destination for the health check request (default `"/internal/healthcheck"`)
+- `health_check_timeout` - (string) - The amount of time, in seconds, during which no response means a failed health check (default `"4"`)
+- `health_check_healthy_threshold` - (string) - The number of consecutive health checks successes required before considering an unhealthy target healthy (default `"2"`)
+- `health_check_unhealthy_threshold` - (string) - The number of consecutive health check failures required before considering the target unhealthy (default `"2"`)
+- `health_check_matcher` - (string) - The HTTP codes to use when checking for a successful response from a target. You can specify multiple values (for example, "200,202") or a range of values (for example, "200-299") (default `"200-299"`) 
 
 Usage
 -----
