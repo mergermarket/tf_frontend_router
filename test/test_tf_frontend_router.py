@@ -6,22 +6,20 @@ import unittest
 from string import ascii_lowercase
 from subprocess import check_call, check_output
 
-from hypothesis import given
-from hypothesis.strategies import sampled_from, text
-
-
-"""
-Takes a template (i.e. what you'd call `.format(...)` on, and returns a regex
-to to match it:
-    print(re.match(
-        template_to_re("hello {name}"),
-        "hello world"
-    ).group("name"))
-    # prints "world"
-"""
+from hypothesis import example, given
+from hypothesis.strategies import fixed_dictionaries, sampled_from, text
 
 
 def template_to_re(t):
+    """
+    Takes a template (i.e. what you'd call `.format(...)` on, and
+    returns a regex to to match it:
+        print(re.match(
+            template_to_re("hello {name}"),
+            "hello world"
+        ).group("name"))
+        # prints "world"
+    """
     seen = dict()
 
     def pattern(placeholder, open_curly, close_curly, text):
@@ -107,14 +105,27 @@ class TestTFFrontendRouter(unittest.TestCase):
 Plan: 13 to add, 0 to change, 0 to destroy.
         """.strip() in output
 
-    def test_create_default_404_service_target_group(self):
+    @given(fixed_dictionaries({
+        'environment': text(alphabet=ascii_lowercase, min_size=1),
+        'component': text(alphabet=ascii_lowercase+'-', min_size=1).filter(lambda c: len(c.replace('-', ''))),
+        'team': text(alphabet=ascii_lowercase+'-', min_size=1).filter(lambda c: len(c.replace('-', ''))),
+    }))
+    @example({
+        'environment': 'live',
+        'component': 'a'*21,
+        'team': 'kubric',
+    })
+    def test_create_default_404_service_target_group(self, fixtures):
         # When
+        env = fixtures['environment']
+        component = fixtures['component']
+        team = fixtures['team']
         output = check_output([
             'terraform',
             'plan',
-            '-var', 'env=foo',
-            '-var', 'component=foobar',
-            '-var', 'team=foobar',
+            '-var', 'env={}'.format(env),
+            '-var', 'component={}'.format(component),
+            '-var', 'team={}'.format(team),
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -126,6 +137,11 @@ Plan: 13 to add, 0 to change, 0 to destroy.
             'qwerty'
         ), cwd=self.workdir).decode('utf-8')
 
+        expected_name = re.sub(
+            '^-+|-+$', '',
+            '{}-{}'.format(env, component)[0:24]
+        )
+
         # Then
         assert re.search(template_to_re("""
   + module.frontend_router.module.default_backend_ecs_service.aws_alb_target_group.target_group
@@ -134,20 +150,20 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       arn_suffix:                                <computed>
       deregistration_delay:                      "10"
       health_check.#:                            "1"
-      health_check.{ident}.healthy_threshold:          "2"
-      health_check.{ident}.interval:                   "5"
-      health_check.{ident}.matcher:                    "200-299"
-      health_check.{ident}.path:                       "/internal/healthcheck"
-      health_check.{ident}.port:                       "traffic-port"
-      health_check.{ident}.protocol:                   "HTTP"
-      health_check.{ident}.timeout:                    "4"
-      health_check.{ident}.unhealthy_threshold:        "2"
-      name:                                      "foo-foobar-default"
+      health_check.{{ident}}.healthy_threshold:          "2"
+      health_check.{{ident}}.interval:                   "5"
+      health_check.{{ident}}.matcher:                    "200-299"
+      health_check.{{ident}}.path:                       "/internal/healthcheck"
+      health_check.{{ident}}.port:                       "traffic-port"
+      health_check.{{ident}}.protocol:                   "HTTP"
+      health_check.{{ident}}.timeout:                    "4"
+      health_check.{{ident}}.unhealthy_threshold:        "2"
+      name:                                      "{}-default"
       port:                                      "31337"
       protocol:                                  "HTTP"
       stickiness.#:                              <computed>
       vpc_id:                                    "vpc-12345678"
-        """.strip()), output) # noqa
+        """.format(expected_name).strip()), output) # noqa
 
     def test_create_default_404_service_ecs_service(self):
         # When
@@ -191,14 +207,34 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       placement_strategy.{ident}.type:        "spread"
         """.strip()), output) # noqa
 
-    def test_create_public_alb_in_public_subnets(self):
+    @given(fixed_dictionaries({
+        'environment': text(alphabet=ascii_lowercase, min_size=1),
+        'component': text(alphabet=ascii_lowercase+'-', min_size=1).filter(lambda c: len(c.replace('-', ''))),
+        'team': text(alphabet=ascii_lowercase+'-', min_size=1).filter(lambda c: len(c.replace('-', ''))),
+    }))
+    @example({
+        'environment': 'live',
+        'component': 'a'*21,
+        'team': 'kubric',
+    })
+    def test_create_public_alb_in_public_subnets(self, fixtures):
+        # Given
+        env = fixtures['environment']
+        component = fixtures['component']
+        team = fixtures['team']
+
+        expected_name = re.sub(
+            '^-+|-+$', '',
+            '{}-{}'.format(env, component)[0:25]
+        )
+
         # When
         output = check_output([
             'terraform',
             'plan',
-            '-var', 'env=foo',
-            '-var', 'component=foobar',
-            '-var', 'team=foobar',
+            '-var', 'env={}'.format(env),
+            '-var', 'component={}'.format(component),
+            '-var', 'team={}'.format(team),
             '-var', 'fastly_domain=externaldomain.com',
             '-var', 'alb_domain=domain.com',
             '-var-file={}/test/platform-config/eu-west-1.json'.format(
@@ -221,19 +257,19 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       idle_timeout:                          "60"
       internal:                              "false"
       ip_address_type:                       <computed>
-      name:                                  "foo-foobar-router"
+      name:                                  "{}-router"
       security_groups.#:                     <computed>
       subnets.#:                             "3"
-      subnets.{ident1}:                    "subnet-55555555"
-      subnets.{ident2}:                    "subnet-33333333"
-      subnets.{ident3}:                    "subnet-44444444"
+      subnets.{{ident1}}:                    "subnet-55555555"
+      subnets.{{ident2}}:                    "subnet-33333333"
+      subnets.{{ident3}}:                    "subnet-44444444"
       tags.%:                                "3"
-      tags.component:                        "foobar"
-      tags.environment:                      "foo"
-      tags.team:                             "foobar"
+      tags.component:                        "{}"
+      tags.environment:                      "{}"
+      tags.team:                             "{}"
       vpc_id:                                <computed>
       zone_id:                               <computed>
-        """.strip()), output) # noqa
+        """.format(expected_name, component, env, team).strip()), output) # noqa
 
     def test_create_public_alb_listener(self):
         # When
@@ -725,46 +761,6 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       request_setting.{ident}.timer_support:     ""
       request_setting.{ident}.xff:               "append"
         """.strip()), output) # noqa
-
-    @given(
-        env=sampled_from(('ci', 'dev', 'aslive', 'live')),
-        component=text(alphabet=ascii_lowercase, min_size=16, max_size=32)
-    )
-    def test_create_resources_when_long_component_names(self, env, component):
-        # Given
-        env_component_name = '{}-{}'.format(env, component)
-
-        # When
-        output = check_output([
-            'terraform',
-            'plan',
-            '-var', 'env={}'.format(env),
-            '-var', 'component={}'.format(component),
-            '-var', 'team=foobar',
-            '-var', 'fastly_domain=externaldomain.com',
-            '-var', 'alb_domain=domain.com',
-            '-var-file={}/test/platform-config/eu-west-1.json'.format(
-                self.base_path
-            ),
-            '-no-color',
-            '-target=module.frontend_router.module.alb.aws_alb.alb', # noqa
-        ] + [self.module_path], env=self._env_for_check_output(
-            'qwerty'
-        ), cwd=self.workdir).decode('utf-8')
-
-        # Then
-        assert """
-+ module.frontend_router.module.alb.aws_alb.alb
-      id:                                    <computed>
-      arn:                                   <computed>
-      arn_suffix:                            <computed>
-      dns_name:                              <computed>
-      enable_deletion_protection:            "false"
-      idle_timeout:                          "60"
-      internal:                              "false"
-      ip_address_type:                       <computed>
-      name:                                  "{name}-router"
-        """.format(name=env_component_name[:23]).strip() in output # noqa
 
     def test_custom_timeouts(self):
         # When
