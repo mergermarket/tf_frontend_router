@@ -68,3 +68,15 @@ module "alb" {
     team        = "${var.team}"
   }
 }
+
+resource "aws_route53_record" "alb_alias" {
+  zone_id = "${module.alb.alb_zone_id}"
+  name    = "${format("%s-%s%s.%s", var.env, var.component, var.env == "live" ? "" : ".dev", var.alb_domain)}"
+  type    = "A"
+
+  alias {
+    name                   = "${module.alb.alb_dns_name}"
+    zone_id                = "${module.alb.alb_zone_id}"
+    evaluate_target_health = true
+  }
+}

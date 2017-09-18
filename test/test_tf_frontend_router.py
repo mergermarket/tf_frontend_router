@@ -410,18 +410,18 @@ Plan: 14 to add, 0 to change, 0 to destroy.
 
         # Then
         assert re.search(template_to_re("""
-      backend.~{ident}.healthcheck:              ""
-      backend.~{ident}.max_conn:                 "200"
-      backend.~{ident}.name:                     "default backend"
-      backend.~{ident}.port:                     "443"
-      backend.~{ident}.request_condition:        ""
-      backend.~{ident}.shield:                   ""
-      backend.~{ident}.ssl_ca_cert:              ""
-      backend.~{ident}.ssl_cert_hostname:        ""
-      backend.~{ident}.ssl_check_cert:           "true"
-      backend.~{ident}.ssl_hostname:             ""
-      backend.~{ident}.ssl_sni_hostname:         ""
-      backend.~{ident}.weight:                   "100"
+      backend.~{ident}.healthcheck:               ""
+      backend.~{ident}.max_conn:                  "200"
+      backend.~{ident}.name:                      "default backend"
+      backend.~{ident}.port:                      "443"
+      backend.~{ident}.request_condition:         ""
+      backend.~{ident}.shield:                    ""
+      backend.~{ident}.ssl_ca_cert:               ""
+      backend.~{ident}.ssl_cert_hostname:         "foo-foobar.dev.domain.com"
+      backend.~{ident}.ssl_check_cert:            "true"
+      backend.~{ident}.ssl_hostname:              ""
+      backend.~{ident}.ssl_sni_hostname:          ""
+      backend.~{ident}.weight:                    "100"
         """.strip()), output) # noqa
 
     def test_create_fastly_config_all_urls_condition(self):
