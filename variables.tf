@@ -40,6 +40,12 @@ variable "backend_ip" {
   default     = "404"
 }
 
+variable "backend_port" {
+  description = "Backend port to use; default: 80"
+  type        = "string"
+  default     = "80"
+}
+
 variable "ssl_cert_check" {
   description = "Check the backend cert is valid"
   type        = "string"

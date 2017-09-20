@@ -18,7 +18,8 @@ module "haproxy_proxy_container_definition" {
   container_port = "8000"
 
   container_env = {
-    BACKEND_IP = "${var.backend_ip}"
+    BACKEND_IP   = "${var.backend_ip}"
+    BACKEND_PORT = "${var.backend_port}"
   }
 }
 
