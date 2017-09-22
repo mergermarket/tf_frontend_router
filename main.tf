@@ -59,6 +59,8 @@ module "alb" {
   internal                 = "false"
   certificate_domain_name  = "${format("*.%s%s", var.env != "live" ? "dev." : "", var.alb_domain)}"
   default_target_group_arn = "${module.default_backend_ecs_service.target_group_arn}"
+  access_logs_bucket       = "${lookup(var.platform_config, "elb_access_logs_bucket", "")}"
+  access_logs_enabled      = "${"${lookup(var.platform_config, "elb_access_logs_bucket", "")}" == "" ? false : true}"
 
   tags = {
     component   = "${var.component}"
