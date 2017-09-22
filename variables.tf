@@ -28,6 +28,12 @@ variable "alb_domain" {
 }
 
 # optional
+variable "bare_redirect_domain_name" {
+  type        = "string"
+  default     = ""
+  description = "If set then an additional service will be created to redirect the zone apex (bare domain) to the domain - i.e. add the www."
+}
+
 variable "backend_ip" {
   description = "Backend to route all requests by default to; default: 404 (see README)"
   type        = "string"

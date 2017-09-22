@@ -250,6 +250,8 @@ Plan: 14 to add, 0 to change, 0 to destroy.
         assert re.search(template_to_re("""
 + module.frontend_router.module.alb.aws_alb.alb
       id:                                    <computed>
+      access_logs.#:                         "1"
+      access_logs.0.enabled:                 "false"
       arn:                                   <computed>
       arn_suffix:                            <computed>
       dns_name:                              <computed>
