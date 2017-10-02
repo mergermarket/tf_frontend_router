@@ -69,9 +69,21 @@ module "alb" {
   }
 }
 
+data "aws_route53_zone" "dns_domain" {
+  name  = "${data.template_file.domain.rendered}"
+}
+
+data "template_file" "domain" {
+  template = "$${env == "live" ? "$${domain}" : "dev.$${domain}"}."
+  vars {
+    env    = "${var.env}"
+    domain = "${var.alb_domain}"
+  }
+}
+
 resource "aws_route53_record" "alb_alias" {
-  zone_id = "${module.alb.alb_zone_id}"
-  name    = "${format("%s-%s%s.%s", var.env, var.component, var.env == "live" ? "" : ".dev", var.alb_domain)}"
+  zone_id = "${data.aws_route53_zone.dns_domain.zone_id}"
+  name    = "${var.env == "live" ? "${var.component}" : "${var.env}-${var.component}"}.${data.template_file.domain.rendered}"
   type    = "A"
 
   alias {
