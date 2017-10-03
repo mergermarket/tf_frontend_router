@@ -69,26 +69,12 @@ module "alb" {
   }
 }
 
-data "aws_route53_zone" "dns_domain" {
-  name  = "${data.template_file.domain.rendered}"
-}
+module "dns_record" {
+  source = "github.com/mergermarket/tf_route53_dns?ref=PLAT-1117_frontend-boilerplate-dns"
 
-data "template_file" "domain" {
-  template = "$${env == "live" ? "$${domain}" : "dev.$${domain}"}."
-  vars {
-    env    = "${var.env}"
-    domain = "${var.alb_domain}"
-  }
-}
-
-resource "aws_route53_record" "alb_alias" {
-  zone_id = "${data.aws_route53_zone.dns_domain.zone_id}"
-  name    = "${var.env == "live" ? "${var.component}" : "${var.env}-${var.component}"}.${data.template_file.domain.rendered}"
-  type    = "A"
-
-  alias {
-    name                   = "${module.alb.alb_dns_name}"
-    zone_id                = "${module.alb.alb_zone_id}"
-    evaluate_target_health = true
-  }
+  domain      = "${var.alb_domain}"
+  name        = "${var.component}"
+  env         = "${var.env}"
+  target      = "${module.alb.alb_dns_name}"
+  alb_zone_id = "${module.alb.alb_zone_id}"
 }
