@@ -413,27 +413,27 @@ Plan: 15 to add, 0 to change, 0 to destroy.
         ), cwd=self.workdir).decode('utf-8')
 
         # Then
-        assert """
+        assert re.search(template_to_re("""
       backend.#:                                    "1"
-      backend.~3792877954.address:                  "${var.backend_address}"
-      backend.~3792877954.auto_loadbalance:         "true"
-      backend.~3792877954.between_bytes_timeout:    "30000"
-      backend.~3792877954.connect_timeout:          "5000"
-      backend.~3792877954.error_threshold:          "0"
-      backend.~3792877954.first_byte_timeout:       "60000"
-      backend.~3792877954.healthcheck:              ""
-      backend.~3792877954.max_conn:                 "200"
-      backend.~3792877954.name:                     "default backend"
-      backend.~3792877954.port:                     "443"
-      backend.~3792877954.request_condition:        ""
-      backend.~3792877954.shield:                   ""
-      backend.~3792877954.ssl_ca_cert:              ""
-      backend.~3792877954.ssl_cert_hostname:        "${var.ssl_cert_hostname}"
-      backend.~3792877954.ssl_check_cert:           "true"
-      backend.~3792877954.ssl_hostname:             ""
-      backend.~3792877954.ssl_sni_hostname:         ""
-      backend.~3792877954.weight:                   "100"
-        """.strip() in output
+      backend.~{ident}.address:                  "${{var.backend_address}}"
+      backend.~{ident}.auto_loadbalance:         "true"
+      backend.~{ident}.between_bytes_timeout:    "30000"
+      backend.~{ident}.connect_timeout:          "5000"
+      backend.~{ident}.error_threshold:          "0"
+      backend.~{ident}.first_byte_timeout:       "60000"
+      backend.~{ident}.healthcheck:              ""
+      backend.~{ident}.max_conn:                 "200"
+      backend.~{ident}.name:                     "default backend"
+      backend.~{ident}.port:                     "443"
+      backend.~{ident}.request_condition:        ""
+      backend.~{ident}.shield:                   ""
+      backend.~{ident}.ssl_ca_cert:              ""
+      backend.~{ident}.ssl_cert_hostname:        "${{var.ssl_cert_hostname}}"
+      backend.~{ident}.ssl_check_cert:           "true"
+      backend.~{ident}.ssl_hostname:             ""
+      backend.~{ident}.ssl_sni_hostname:         ""
+      backend.~{ident}.weight:                   "100"
+        """.strip()), output)
 
     def test_create_fastly_config_all_urls_condition(self):
         # When
