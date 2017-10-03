@@ -43,16 +43,20 @@ def template_to_re(t):
 
 class TestTFFrontendRouter(unittest.TestCase):
 
-    def setUp(self):
-        self.workdir = tempfile.mkdtemp()
-        self.base_path = os.getcwd()
-        self.module_path = os.path.join(os.getcwd(), 'test', 'infra')
+    @classmethod
+    def setup_class(cls):
+        cls.workdir = tempfile.mkdtemp()
+        cls.base_path = os.getcwd()
+        cls.module_path = os.path.join(os.getcwd(), 'test', 'infra')
 
-        check_call(['terraform', 'init', self.module_path], cwd=self.workdir)
+        check_call(['terraform', 'init', cls.module_path], cwd=cls.workdir)
 
-    def tearDown(self):
-        if os.path.isdir(self.workdir):
-            shutil.rmtree(self.workdir)
+    @classmethod
+    def teardown_class(cls):
+        try:
+            shutil.rmtree(cls.workdir)
+        except Exception as e:
+            print('Error removing {}: {}', cls.workdir, e)
 
     def _env_for_check_output(self, fastly_api_key):
         env = os.environ.copy()
@@ -102,7 +106,7 @@ class TestTFFrontendRouter(unittest.TestCase):
 
         # Then
         assert """
-Plan: 14 to add, 0 to change, 0 to destroy.
+Plan: 15 to add, 0 to change, 0 to destroy.
         """.strip() in output
 
     @given(fixed_dictionaries({
@@ -410,6 +414,13 @@ Plan: 14 to add, 0 to change, 0 to destroy.
 
         # Then
         assert re.search(template_to_re("""
+      backend.#:                                    "1"
+      backend.~{ident}.address:                  "${{var.backend_address}}"
+      backend.~{ident}.auto_loadbalance:         "true"
+      backend.~{ident}.between_bytes_timeout:    "30000"
+      backend.~{ident}.connect_timeout:          "5000"
+      backend.~{ident}.error_threshold:          "0"
+      backend.~{ident}.first_byte_timeout:       "60000"
       backend.~{ident}.healthcheck:              ""
       backend.~{ident}.max_conn:                 "200"
       backend.~{ident}.name:                     "default backend"
@@ -417,12 +428,12 @@ Plan: 14 to add, 0 to change, 0 to destroy.
       backend.~{ident}.request_condition:        ""
       backend.~{ident}.shield:                   ""
       backend.~{ident}.ssl_ca_cert:              ""
-      backend.~{ident}.ssl_cert_hostname:        ""
+      backend.~{ident}.ssl_cert_hostname:        "${{var.ssl_cert_hostname}}"
       backend.~{ident}.ssl_check_cert:           "true"
       backend.~{ident}.ssl_hostname:             ""
       backend.~{ident}.ssl_sni_hostname:         ""
       backend.~{ident}.weight:                   "100"
-        """.strip()), output) # noqa
+        """.strip()), output)
 
     def test_create_fastly_config_all_urls_condition(self):
         # When

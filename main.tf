@@ -68,3 +68,14 @@ module "alb" {
     team        = "${var.team}"
   }
 }
+
+module "dns_record" {
+  source = "github.com/mergermarket/tf_route53_dns"
+
+  domain      = "${var.alb_domain}"
+  name        = "${var.component}"
+  env         = "${var.env}"
+  target      = "${module.alb.alb_dns_name}"
+  alb_zone_id = "${module.alb.alb_zone_id}"
+  alias       = "1"
+}
