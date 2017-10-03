@@ -70,7 +70,7 @@ module "alb" {
 }
 
 module "dns_record" {
-  source = "github.com/mergermarket/tf_route53_dns?ref=PLAT-1117_frontend-boilerplate-dns"
+  source = "github.com/mergermarket/tf_route53_dns"
 
   domain      = "${var.alb_domain}"
   name        = "${var.component}"
