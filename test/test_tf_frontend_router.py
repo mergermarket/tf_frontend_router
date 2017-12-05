@@ -94,7 +94,6 @@ class TestTFFrontendRouter(unittest.TestCase):
             ),
             '-no-color',
             '-target=module.frontend_router.module.default_backend_ecs_service', # noqa
-            '-target=module.frontend_router.module.404_container_definition', # noqa
             '-target=module.frontend_router.module.haproxy_proxy_container_definition', # noqa
             '-target=module.frontend_router.module.default_backend_task_definition', # noqa
             '-target=module.frontend_router.module.default_backend_ecs_service', # noqa
@@ -106,110 +105,8 @@ class TestTFFrontendRouter(unittest.TestCase):
 
         # Then
         assert """
-Plan: 15 to add, 0 to change, 0 to destroy.
+Plan: 6 to add, 0 to change, 0 to destroy.
         """.strip() in output
-
-    @given(fixed_dictionaries({
-        'environment': text(alphabet=ascii_lowercase, min_size=1),
-        'component': text(alphabet=ascii_lowercase+'-', min_size=1).filter(lambda c: len(c.replace('-', ''))),
-        'team': text(alphabet=ascii_lowercase+'-', min_size=1).filter(lambda c: len(c.replace('-', ''))),
-    }))
-    @example({
-        'environment': 'live',
-        'component': 'a'*21,
-        'team': 'kubric',
-    })
-    def test_create_default_404_service_target_group(self, fixtures):
-        # When
-        env = fixtures['environment']
-        component = fixtures['component']
-        team = fixtures['team']
-        output = check_output([
-            'terraform',
-            'plan',
-            '-var', 'env={}'.format(env),
-            '-var', 'component={}'.format(component),
-            '-var', 'team={}'.format(team),
-            '-var', 'fastly_domain=externaldomain.com',
-            '-var', 'alb_domain=domain.com',
-            '-var-file={}/test/platform-config/eu-west-1.json'.format(
-                self.base_path
-            ),
-            '-no-color',
-            '-target=module.frontend_router.module.default_backend_ecs_service', # noqa
-        ] + [self.module_path], env=self._env_for_check_output(
-            'qwerty'
-        ), cwd=self.workdir).decode('utf-8')
-
-        expected_name = re.sub(
-            '^-+|-+$', '',
-            '{}-{}'.format(env, component)[0:24]
-        )
-
-        # Then
-        assert re.search(template_to_re("""
-  + module.frontend_router.module.default_backend_ecs_service.aws_alb_target_group.target_group
-      id:                                        <computed>
-      arn:                                       <computed>
-      arn_suffix:                                <computed>
-      deregistration_delay:                      "10"
-      health_check.#:                            "1"
-      health_check.{{ident}}.healthy_threshold:          "2"
-      health_check.{{ident}}.interval:                   "5"
-      health_check.{{ident}}.matcher:                    "200-299"
-      health_check.{{ident}}.path:                       "/internal/healthcheck"
-      health_check.{{ident}}.port:                       "traffic-port"
-      health_check.{{ident}}.protocol:                   "HTTP"
-      health_check.{{ident}}.timeout:                    "4"
-      health_check.{{ident}}.unhealthy_threshold:        "2"
-      name:                                      "{}-default"
-      port:                                      "31337"
-      protocol:                                  "HTTP"
-      stickiness.#:                              <computed>
-      vpc_id:                                    "vpc-12345678"
-        """.format(expected_name).strip()), output) # noqa
-
-    def test_create_default_404_service_ecs_service(self):
-        # When
-        output = check_output([
-            'terraform',
-            'plan',
-            '-var', 'env=foo',
-            '-var', 'component=foobar',
-            '-var', 'team=foobar',
-            '-var', 'fastly_domain=externaldomain.com',
-            '-var', 'alb_domain=domain.com',
-            '-var-file={}/test/platform-config/eu-west-1.json'.format(
-                self.base_path
-            ),
-            '-no-color',
-            '-target=module.frontend_router.module.default_backend_ecs_service.aws_ecs_service.service', # noqa
-        ] + [self.module_path], env=self._env_for_check_output(
-            'qwerty'
-        ), cwd=self.workdir).decode('utf-8')
-
-        assert """
-  + module.frontend_router.module.default_backend_ecs_service.aws_ecs_service.service
-      id:                                        <computed>
-      cluster:                                   "default"
-      deployment_maximum_percent:                "200"
-      deployment_minimum_healthy_percent:        "100"
-      desired_count:                             "1"
-        """.strip() in output # noqa
-
-        assert """
-      name:                                      "foo-foobar-default"
-        """.strip() in output # noqa
-
-        assert re.search(template_to_re("""
-      placement_strategy.{ident1}.field:       "instanceId"
-      placement_strategy.{ident1}.type:        "spread"
-        """.strip()), output) # noqa
-
-        assert re.search(template_to_re("""
-      placement_strategy.{ident}.field:       "attribute:ecs.availability-zone"
-      placement_strategy.{ident}.type:        "spread"
-        """.strip()), output) # noqa
 
     @given(fixed_dictionaries({
         'environment': text(alphabet=ascii_lowercase, min_size=1),
@@ -346,15 +243,23 @@ Plan: 15 to add, 0 to change, 0 to destroy.
       egress.{ident1}.security_groups.#:    "0"
       egress.{ident1}.self:                 "false"
       egress.{ident1}.to_port:              "0"
-      ingress.#:                             "1"
+      ingress.#:                             "2"
       ingress.{ident2}.cidr_blocks.#:      "1"
       ingress.{ident2}.cidr_blocks.0:      "0.0.0.0/0"
-      ingress.{ident2}.from_port:          "443"
+      ingress.{ident2}.from_port:          "80"
       ingress.{ident2}.ipv6_cidr_blocks.#: "0"
       ingress.{ident2}.protocol:           "tcp"
       ingress.{ident2}.security_groups.#:  "0"
       ingress.{ident2}.self:               "false"
-      ingress.{ident2}.to_port:            "443"
+      ingress.{ident2}.to_port:            "80"
+      ingress.{ident3}.cidr_blocks.#:      "1"
+      ingress.{ident3}.cidr_blocks.0:      "0.0.0.0/0"
+      ingress.{ident3}.from_port:          "443"
+      ingress.{ident3}.ipv6_cidr_blocks.#: "0"
+      ingress.{ident3}.protocol:           "tcp"
+      ingress.{ident3}.security_groups.#:  "0"
+      ingress.{ident3}.self:               "false"
+      ingress.{ident3}.to_port:            "443"
       name:                                  <computed>
       owner_id:                              <computed>
       vpc_id:                                "vpc-12345678"
