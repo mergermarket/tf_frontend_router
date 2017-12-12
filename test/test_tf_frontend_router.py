@@ -346,22 +346,31 @@ Plan: 15 to add, 0 to change, 0 to destroy.
       egress.{ident1}.security_groups.#:    "0"
       egress.{ident1}.self:                 "false"
       egress.{ident1}.to_port:              "0"
-      ingress.#:                             "1"
+      ingress.#:                             "2"
       ingress.{ident2}.cidr_blocks.#:      "1"
       ingress.{ident2}.cidr_blocks.0:      "0.0.0.0/0"
-      ingress.{ident2}.from_port:          "443"
+      ingress.{ident2}.from_port:          "80"
       ingress.{ident2}.ipv6_cidr_blocks.#: "0"
       ingress.{ident2}.protocol:           "tcp"
       ingress.{ident2}.security_groups.#:  "0"
       ingress.{ident2}.self:               "false"
-      ingress.{ident2}.to_port:            "443"
+      ingress.{ident2}.to_port:            "80"
+      ingress.{ident3}.cidr_blocks.#:      "1"
+      ingress.{ident3}.cidr_blocks.0:      "0.0.0.0/0"
+      ingress.{ident3}.from_port:          "443"
+      ingress.{ident3}.ipv6_cidr_blocks.#: "0"
+      ingress.{ident3}.protocol:           "tcp"
+      ingress.{ident3}.security_groups.#:  "0"
+      ingress.{ident3}.self:               "false"
+      ingress.{ident3}.to_port:            "443"
       name:                                  <computed>
       owner_id:                              <computed>
       vpc_id:                                "vpc-12345678"
-
         """.strip()), output) # noqa
 
+
     def test_create_fastly_config(self):
+
         # When
         output = check_output([
             'terraform',

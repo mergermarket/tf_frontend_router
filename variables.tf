@@ -117,3 +117,15 @@ variable "health_check_matcher" {
   type        = "string"
   default     = "200-299"
 }
+
+variable "custom_vcl_backends" {
+  type        = "string"
+  description = "Custom VCL to add at the top level (e.g. for defining backends)"
+  default     = ""
+}
+
+variable "custom_vcl_recv" {
+  type        = "string"
+  description = "Custom VCL to add to the vcl_recv sub after the Fastly hook"
+  default     = ""
+}
