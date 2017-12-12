@@ -3,7 +3,7 @@ variable "name" {}
 variable "vpc_id" {}
 
 resource "aws_alb_target_group" "target_group" {
-  name = "${replace(replace(var.name, "/(.{0,32}).*/", "$1"), "/^-+|-+$/", "")}"
+  name = "${replace(replace(var.name, "/(.{0,24}).*/", "$1"), "/^-+|-+$/", "")}-default"
 
   # port will be set dynamically, but for some reason AWS requires a value
   port                 = "31337"
