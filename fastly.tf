@@ -11,4 +11,6 @@ module "fastly" {
   connect_timeout           = "${var.connect_timeout}"
   first_byte_timeout        = "${var.first_byte_timeout}"
   between_bytes_timeout     = "${var.between_bytes_timeout}"
+  custom_vcl_backends       = "${var.custom_vcl_backends}"
+  custom_vcl_recv           = "${var.custom_vcl_recv}"
 }

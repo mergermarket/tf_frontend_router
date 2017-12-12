@@ -263,10 +263,11 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       name:                                  <computed>
       owner_id:                              <computed>
       vpc_id:                                "vpc-12345678"
-
         """.strip()), output) # noqa
 
+
     def test_create_fastly_config(self):
+
         # When
         output = check_output([
             'terraform',
