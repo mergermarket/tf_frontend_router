@@ -153,6 +153,7 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       id:                                    <computed>
       access_logs.#:                         "1"
       access_logs.0.enabled:                 "false"
+      access_logs.0.prefix:                  <computed>
       arn:                                   <computed>
       arn_suffix:                            <computed>
       dns_name:                              <computed>
@@ -160,6 +161,7 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       idle_timeout:                          "60"
       internal:                              "false"
       ip_address_type:                       <computed>
+      load_balancer_type:                    "application"
       name:                                  "{}-router"
       security_groups.#:                     <computed>
       subnets.#:                             "3"
@@ -236,6 +238,7 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       egress.#:                              "1"
       egress.{ident1}.cidr_blocks.#:        "1"
       egress.{ident1}.cidr_blocks.0:        "0.0.0.0/0"
+      egress.{ident1}.description:          ""
       egress.{ident1}.from_port:            "0"
       egress.{ident1}.ipv6_cidr_blocks.#:   "0"
       egress.{ident1}.prefix_list_ids.#:    "0"
@@ -246,6 +249,7 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       ingress.#:                             "2"
       ingress.{ident2}.cidr_blocks.#:      "1"
       ingress.{ident2}.cidr_blocks.0:      "0.0.0.0/0"
+      ingress.{ident2}.description:        ""
       ingress.{ident2}.from_port:          "80"
       ingress.{ident2}.ipv6_cidr_blocks.#: "0"
       ingress.{ident2}.protocol:           "tcp"
@@ -254,6 +258,7 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       ingress.{ident2}.to_port:            "80"
       ingress.{ident3}.cidr_blocks.#:      "1"
       ingress.{ident3}.cidr_blocks.0:      "0.0.0.0/0"
+      ingress.2617001939.description:        ""
       ingress.{ident3}.from_port:          "443"
       ingress.{ident3}.ipv6_cidr_blocks.#: "0"
       ingress.{ident3}.protocol:           "tcp"
@@ -262,6 +267,7 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       ingress.{ident3}.to_port:            "443"
       name:                                  <computed>
       owner_id:                              <computed>
+      revoke_rules_on_delete:                "false"
       vpc_id:                                "vpc-12345678"
         """.strip()), output) # noqa
 

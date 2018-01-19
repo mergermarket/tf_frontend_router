@@ -135,3 +135,9 @@ variable "custom_vcl_recv" {
   description = "Custom VCL to add to the vcl_recv sub after the Fastly hook"
   default     = ""
 }
+
+variable "target_type" {
+  description = "The type of target that you must specify when registering targets with this target group. The possible values are instance (targets are specified by instance ID) or ip (targets are specified by IP address). The default is instance."
+  type        = "string"
+  default     = "instance"
+}
