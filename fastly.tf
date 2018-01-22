@@ -3,7 +3,7 @@ module "fastly" {
 
   domain_name               = "${var.fastly_domain}"
   bare_redirect_domain_name = "${var.bare_redirect_domain_name}"
-  backend_address           = "${module.alb.alb_dns_name}"
+  backend_address           = "${module.dns_record.fqdn}"
   env                       = "${var.env}"
   caching                   = "${var.fastly_caching}"
   ssl_cert_check            = "${var.ssl_cert_check}"
