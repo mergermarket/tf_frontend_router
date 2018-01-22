@@ -136,8 +136,8 @@ variable "custom_vcl_recv" {
   default     = ""
 }
 
-variable "target_type" {
-  description = "The type of target that you must specify when registering targets with this target group. The possible values are instance (targets are specified by instance ID) or ip (targets are specified by IP address). The default is instance."
+variable "default_target_group_target_type" {
+  description = "The type of target that you must specify when registering targets with the default target group. The possible values are instance (targets are specified by instance ID) or ip (targets are specified by IP address). The default is instance."
   type        = "string"
   default     = "instance"
 }

@@ -44,7 +44,7 @@ resource "aws_alb_target_group" "default_target_group" {
   protocol             = "HTTP"
   vpc_id               = "${var.platform_config["vpc"]}"
   deregistration_delay = "${var.default_target_group_deregistration_delay}"
-  target_type          = "${var.target_type}"
+  target_type          = "${var.default_target_group_target_type}"
 
   health_check {
     interval            = "${var.default_target_group_health_check_interval}"
