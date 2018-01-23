@@ -6,7 +6,7 @@ import unittest
 from string import ascii_lowercase
 from subprocess import check_call, check_output
 
-from hypothesis import example, given
+from hypothesis import example, given, settings
 from hypothesis.strategies import fixed_dictionaries, sampled_from, text
 
 
@@ -22,9 +22,11 @@ def template_to_re(t):
     """
     seen = dict()
 
-    def pattern(placeholder, open_curly, close_curly, text):
+    def pattern(placeholder, open_curly, close_curly, text, hspace):
         if text is not None:
             return re.escape(text)
+        elif hspace is not None:
+            return r'[ \t]+'
         elif open_curly is not None:
             return r'\{'
         elif close_curly is not None:
@@ -37,7 +39,7 @@ def template_to_re(t):
 
     return "".join([
         pattern(*match.groups())
-        for match in re.finditer(r'{([\w_]+)}|(\{\{)|(\}\})|([^{}]+)', t)
+        for match in re.finditer(r'{([\w_]+)}|(\{\{)|(\}\})|([^{}]+)|([ \t]+)', t)
     ])
 
 
@@ -108,6 +110,7 @@ class TestTFFrontendRouter(unittest.TestCase):
 Plan: 6 to add, 0 to change, 0 to destroy.
         """.strip() in output
 
+    @settings(max_examples=5)
     @given(fixed_dictionaries({
         'environment': text(alphabet=ascii_lowercase, min_size=1),
         'component': text(alphabet=ascii_lowercase+'-', min_size=1).filter(lambda c: len(c.replace('-', ''))),
@@ -118,6 +121,7 @@ Plan: 6 to add, 0 to change, 0 to destroy.
         'component': 'a'*21,
         'team': 'kubric',
     })
+    
     def test_create_public_alb_in_public_subnets(self, fixtures):
         # Given
         env = fixtures['environment']
@@ -258,7 +262,7 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       ingress.{ident2}.to_port:            "80"
       ingress.{ident3}.cidr_blocks.#:      "1"
       ingress.{ident3}.cidr_blocks.0:      "0.0.0.0/0"
-      ingress.2617001939.description:        ""
+      ingress.{ident3}.description:        ""
       ingress.{ident3}.from_port:          "443"
       ingress.{ident3}.ipv6_cidr_blocks.#: "0"
       ingress.{ident3}.protocol:           "tcp"

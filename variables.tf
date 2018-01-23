@@ -141,3 +141,9 @@ variable "default_target_group_target_type" {
   type        = "string"
   default     = "instance"
 }
+
+variable "custom_vcl_error" {
+  type        = "string"
+  description = "Custom VCL to add to the vcl_error sub after the Fastly hook"
+  default     = ""
+}
