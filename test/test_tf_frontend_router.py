@@ -6,7 +6,7 @@ import unittest
 from string import ascii_lowercase
 from subprocess import check_call, check_output
 
-from hypothesis import example, given
+from hypothesis import example, given, settings
 from hypothesis.strategies import fixed_dictionaries, sampled_from, text
 
 
@@ -106,9 +106,10 @@ class TestTFFrontendRouter(unittest.TestCase):
 
         # Then
         assert """
-Plan: 15 to add, 0 to change, 0 to destroy.
+Plan: 13 to add, 0 to change, 0 to destroy.
         """.strip() in output
 
+    @settings(max_examples=5)
     @given(fixed_dictionaries({
         'environment': text(alphabet=ascii_lowercase, min_size=1),
         'component': text(alphabet=ascii_lowercase+'-', min_size=1).filter(lambda c: len(c.replace('-', ''))),
@@ -211,6 +212,7 @@ Plan: 15 to add, 0 to change, 0 to destroy.
       placement_strategy.{ident}.type:        "spread"
         """.strip()), output) # noqa
 
+    @settings(max_examples=5)
     @given(fixed_dictionaries({
         'environment': text(alphabet=ascii_lowercase, min_size=1),
         'component': text(alphabet=ascii_lowercase+'-', min_size=1).filter(lambda c: len(c.replace('-', ''))),
