@@ -58,6 +58,12 @@ variable "ssl_cert_hostname" {
   default     = ""
 }
 
+variable "force_ssl" {
+  type        = "string"
+  description = "Whether or not to force SSL (redirect requests to HTTP to HTTPS)"
+  default     = "true"
+}
+
 variable "fastly_caching" {
   description = "Whether to enable / forcefully disable caching on Fastly (default: true)"
   type        = "string"

@@ -309,6 +309,42 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       domain.{ident}.name:                       "foo-externaldomain.com"
         """.strip()), output) # noqa
 
+    def test_disable_force_ssl(self):
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=foo',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var', 'force_ssl=false',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color',
+            '-target=module.frontend_router.module.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
+
+        # Then
+        assert re.search(template_to_re("""
+      request_setting.{ident}.action:            ""
+      request_setting.{ident}.bypass_busy_wait:  ""
+      request_setting.{ident}.default_host:      ""
+      request_setting.{ident}.force_miss:        "false"
+      request_setting.{ident}.force_ssl:         "false"
+      request_setting.{ident}.geo_headers:       ""
+      request_setting.{ident}.hash_keys:         ""
+      request_setting.{ident}.max_stale_age:     "60"
+      request_setting.{ident}.name:              "disable caching"
+      request_setting.{ident}.request_condition: "all_urls"
+      request_setting.{ident}.timer_support:     ""
+      request_setting.{ident}.xff:               "append"
+        """.strip()), output)
+
     def test_create_fastly_config_backend(self):
         # When
         output = check_output([
