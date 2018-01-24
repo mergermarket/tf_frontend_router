@@ -8,6 +8,7 @@ module "fastly" {
   caching                   = "${var.fastly_caching}"
   ssl_cert_check            = "${var.ssl_cert_check}"
   ssl_cert_hostname         = "${module.dns_record.fqdn}"
+  force_ssl                 = "${var.force_ssl}"
   connect_timeout           = "${var.connect_timeout}"
   first_byte_timeout        = "${var.first_byte_timeout}"
   between_bytes_timeout     = "${var.between_bytes_timeout}"
