@@ -20,6 +20,7 @@ module "frontend_router" {
   env             = "${var.env}"
   component       = "${var.component}"
   platform_config = "${var.platform_config}"
+  force_ssl       = "${var.force_ssl}"
 
   # optional
   # backend_ip = "1.1.1.1"
@@ -88,4 +89,9 @@ variable "between_bytes_timeout" {
   type        = "string"
   description = ""
   default     = 30000
+}
+
+variable "force_ssl" {
+  type    = "string"
+  default = "true"
 }
