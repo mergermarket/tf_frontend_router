@@ -11,6 +11,10 @@ provider "aws" {
   region                      = "eu-west-1"
 }
 
+provider "logentries" {
+  account_key = "dummy"
+}
+
 module "frontend_router" {
   source = "../.."
 

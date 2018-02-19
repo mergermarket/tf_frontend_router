@@ -167,8 +167,10 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       port:                                      "31337"
       protocol:                                  "HTTP"
       stickiness.#:                              <computed>
+      target_type:                               "instance"
       vpc_id:                                    "vpc-12345678"
         """.format(expected_name).strip()), output) # noqa
+
 
     def test_create_default_404_service_ecs_service(self):
         # When
@@ -258,6 +260,7 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       id:                                    <computed>
       access_logs.#:                         "1"
       access_logs.0.enabled:                 "false"
+      access_logs.0.prefix:                  <computed>
       arn:                                   <computed>
       arn_suffix:                            <computed>
       dns_name:                              <computed>
@@ -265,6 +268,7 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       idle_timeout:                          "60"
       internal:                              "false"
       ip_address_type:                       <computed>
+      load_balancer_type:                    "application"
       name:                                  "{}-router"
       security_groups.#:                     <computed>
       subnets.#:                             "3"
@@ -341,6 +345,7 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       egress.#:                              "1"
       egress.{ident1}.cidr_blocks.#:        "1"
       egress.{ident1}.cidr_blocks.0:        "0.0.0.0/0"
+      egress.{ident1}.description:          ""
       egress.{ident1}.from_port:            "0"
       egress.{ident1}.ipv6_cidr_blocks.#:   "0"
       egress.{ident1}.prefix_list_ids.#:    "0"
@@ -351,6 +356,7 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       ingress.#:                             "2"
       ingress.{ident2}.cidr_blocks.#:      "1"
       ingress.{ident2}.cidr_blocks.0:      "0.0.0.0/0"
+      ingress.{ident2}.description:        ""
       ingress.{ident2}.from_port:          "80"
       ingress.{ident2}.ipv6_cidr_blocks.#: "0"
       ingress.{ident2}.protocol:           "tcp"
@@ -359,6 +365,7 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       ingress.{ident2}.to_port:            "80"
       ingress.{ident3}.cidr_blocks.#:      "1"
       ingress.{ident3}.cidr_blocks.0:      "0.0.0.0/0"
+      ingress.{ident3}.description:        ""
       ingress.{ident3}.from_port:          "443"
       ingress.{ident3}.ipv6_cidr_blocks.#: "0"
       ingress.{ident3}.protocol:           "tcp"
@@ -367,6 +374,7 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       ingress.{ident3}.to_port:            "443"
       name:                                  <computed>
       owner_id:                              <computed>
+      revoke_rules_on_delete:                "false"
       vpc_id:                                "vpc-12345678"
         """.strip()), output) # noqa
 
@@ -434,6 +442,8 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       backend.~{ident}.first_byte_timeout:       "60000"
       backend.~{ident}.healthcheck:              ""
       backend.~{ident}.max_conn:                 "200"
+      backend.~{ident}.max_tls_version:          ""
+      backend.~{ident}.min_tls_version:          ""
       backend.~{ident}.name:                     "default backend"
       backend.~{ident}.port:                     "443"
       backend.~{ident}.request_condition:        ""
@@ -441,10 +451,15 @@ Plan: 13 to add, 0 to change, 0 to destroy.
       backend.~{ident}.ssl_ca_cert:              ""
       backend.~{ident}.ssl_cert_hostname:        "${{var.ssl_cert_hostname}}"
       backend.~{ident}.ssl_check_cert:           "true"
+      backend.~{ident}.ssl_ciphers:              ""
+      backend.~{ident}.ssl_client_cert:          <sensitive>
+      backend.~{ident}.ssl_client_key:           <sensitive>
       backend.~{ident}.ssl_hostname:             ""
       backend.~{ident}.ssl_sni_hostname:         ""
+      backend.~{ident}.use_ssl:                  "true"
       backend.~{ident}.weight:                   "100"
         """.strip()), output)
+
 
     def test_create_fastly_config_all_urls_condition(self):
         # When
@@ -559,18 +574,19 @@ Plan: 13 to add, 0 to change, 0 to destroy.
         # Then
         assert re.search(template_to_re("""
       request_setting.{ident}.action:            ""
-      request_setting.{ident}.bypass_busy_wait:  ""
+      request_setting.{ident}.bypass_busy_wait:  "false"
       request_setting.{ident}.default_host:      ""
       request_setting.{ident}.force_miss:        "false"
       request_setting.{ident}.force_ssl:         "true"
       request_setting.{ident}.geo_headers:       ""
       request_setting.{ident}.hash_keys:         ""
-      request_setting.{ident}.max_stale_age:     "60"
+      request_setting.{ident}.max_stale_age:     ""
       request_setting.{ident}.name:              "disable caching"
       request_setting.{ident}.request_condition: "all_urls"
       request_setting.{ident}.timer_support:     ""
       request_setting.{ident}.xff:               "append"
         """.strip()), output) # noqa
+
 
     def test_create_fastly_config_headers_obfuscation(self):
         # When
@@ -773,13 +789,13 @@ Plan: 13 to add, 0 to change, 0 to destroy.
         assert re.search(template_to_re("""
       request_setting.#:                            "1"
       request_setting.{ident}.action:            ""
-      request_setting.{ident}.bypass_busy_wait:  ""
+      request_setting.{ident}.bypass_busy_wait:  "false"
       request_setting.{ident}.default_host:      ""
       request_setting.{ident}.force_miss:        "true"
       request_setting.{ident}.force_ssl:         "true"
       request_setting.{ident}.geo_headers:       ""
       request_setting.{ident}.hash_keys:         ""
-      request_setting.{ident}.max_stale_age:     "60"
+      request_setting.{ident}.max_stale_age:     ""
       request_setting.{ident}.name:              "disable caching"
       request_setting.{ident}.request_condition: "all_urls"
       request_setting.{ident}.timer_support:     ""
@@ -845,6 +861,7 @@ Plan: 13 to add, 0 to change, 0 to destroy.
         assert re.search(template_to_re("""
       logentries.#:                                  "1"
       logentries.~{ident}.format:                 "%h %l %u %t %r %>s"
+      logentries.~{ident}.format_version:         "1"
       logentries.~{ident}.name:                   "dev-externaldomain.com"
       logentries.~{ident}.port:                   "20000"
       logentries.~{ident}.response_condition:     ""
