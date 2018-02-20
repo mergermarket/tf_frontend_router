@@ -121,7 +121,8 @@ Plan: 6 to add, 0 to change, 0 to destroy.
         'component': 'a'*21,
         'team': 'kubric',
     })
-    
+
+
     def test_create_public_alb_in_public_subnets(self, fixtures):
         # Given
         env = fixtures['environment']
@@ -332,13 +333,13 @@ Plan: 6 to add, 0 to change, 0 to destroy.
         # Then
         assert re.search(template_to_re("""
       request_setting.{ident}.action:            ""
-      request_setting.{ident}.bypass_busy_wait:  ""
+      request_setting.{ident}.bypass_busy_wait:  "false"
       request_setting.{ident}.default_host:      ""
       request_setting.{ident}.force_miss:        "false"
       request_setting.{ident}.force_ssl:         "false"
       request_setting.{ident}.geo_headers:       ""
       request_setting.{ident}.hash_keys:         ""
-      request_setting.{ident}.max_stale_age:     "60"
+      request_setting.{ident}.max_stale_age:     ""
       request_setting.{ident}.name:              "disable caching"
       request_setting.{ident}.request_condition: "all_urls"
       request_setting.{ident}.timer_support:     ""
@@ -375,6 +376,8 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       backend.~{ident}.first_byte_timeout:       "60000"
       backend.~{ident}.healthcheck:              ""
       backend.~{ident}.max_conn:                 "200"
+      backend.~{ident}.max_tls_version:          ""
+      backend.~{ident}.min_tls_version:          ""
       backend.~{ident}.name:                     "default backend"
       backend.~{ident}.port:                     "443"
       backend.~{ident}.request_condition:        ""
@@ -382,10 +385,15 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       backend.~{ident}.ssl_ca_cert:              ""
       backend.~{ident}.ssl_cert_hostname:        "${{var.ssl_cert_hostname}}"
       backend.~{ident}.ssl_check_cert:           "true"
+      backend.~{ident}.ssl_ciphers:              ""
+      backend.~{ident}.ssl_client_cert:          <sensitive>
+      backend.~{ident}.ssl_client_key:           <sensitive>
       backend.~{ident}.ssl_hostname:             ""
       backend.~{ident}.ssl_sni_hostname:         ""
+      backend.~{ident}.use_ssl:                  "true"
       backend.~{ident}.weight:                   "100"
         """.strip()), output)
+
 
     def test_create_fastly_config_all_urls_condition(self):
         # When
@@ -500,18 +508,19 @@ Plan: 6 to add, 0 to change, 0 to destroy.
         # Then
         assert re.search(template_to_re("""
       request_setting.{ident}.action:            ""
-      request_setting.{ident}.bypass_busy_wait:  ""
+      request_setting.{ident}.bypass_busy_wait:  "false"
       request_setting.{ident}.default_host:      ""
       request_setting.{ident}.force_miss:        "false"
       request_setting.{ident}.force_ssl:         "true"
       request_setting.{ident}.geo_headers:       ""
       request_setting.{ident}.hash_keys:         ""
-      request_setting.{ident}.max_stale_age:     "60"
+      request_setting.{ident}.max_stale_age:     ""
       request_setting.{ident}.name:              "disable caching"
       request_setting.{ident}.request_condition: "all_urls"
       request_setting.{ident}.timer_support:     ""
       request_setting.{ident}.xff:               "append"
         """.strip()), output) # noqa
+
 
     def test_create_fastly_config_headers_obfuscation(self):
         # When
@@ -714,13 +723,13 @@ Plan: 6 to add, 0 to change, 0 to destroy.
         assert re.search(template_to_re("""
       request_setting.#:                            "1"
       request_setting.{ident}.action:            ""
-      request_setting.{ident}.bypass_busy_wait:  ""
+      request_setting.{ident}.bypass_busy_wait:  "false"
       request_setting.{ident}.default_host:      ""
       request_setting.{ident}.force_miss:        "true"
       request_setting.{ident}.force_ssl:         "true"
       request_setting.{ident}.geo_headers:       ""
       request_setting.{ident}.hash_keys:         ""
-      request_setting.{ident}.max_stale_age:     "60"
+      request_setting.{ident}.max_stale_age:     ""
       request_setting.{ident}.name:              "disable caching"
       request_setting.{ident}.request_condition: "all_urls"
       request_setting.{ident}.timer_support:     ""
@@ -786,6 +795,7 @@ Plan: 6 to add, 0 to change, 0 to destroy.
         assert re.search(template_to_re("""
       logentries.#:                                  "1"
       logentries.~{ident}.format:                 "%h %l %u %t %r %>s"
+      logentries.~{ident}.format_version:         "1"
       logentries.~{ident}.name:                   "dev-externaldomain.com"
       logentries.~{ident}.port:                   "20000"
       logentries.~{ident}.response_condition:     ""
