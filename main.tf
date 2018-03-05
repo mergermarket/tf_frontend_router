@@ -11,7 +11,7 @@ module "alb" {
   name                     = "${replace(replace(format("%s-%s", var.env, var.component), "/(.{0,25}).*/", "$1"), "/^-+|-+$/", "")}-router"
   vpc_id                   = "${var.platform_config["vpc"]}"
   subnet_ids               = ["${split(",", var.platform_config["public_subnets"])}"]
-  extra_security_groups    = ["${var.platform_config["ecs_cluster.default.client_security_group"]}"]
+  extra_security_groups    = ["${var.platform_config["ecs_cluster.${var.ecs_cluster}.client_security_group"]}"]
   internal                 = "false"
   certificate_domain_name  = "${format("*.%s%s", var.env != "live" ? "dev." : "", var.alb_domain)}"
   default_target_group_arn = "${aws_alb_target_group.default_target_group.arn}"

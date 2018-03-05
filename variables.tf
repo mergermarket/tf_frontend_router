@@ -179,3 +179,9 @@ variable "proxy_error_response" {
 </html>
 EOF
 }
+
+variable "ecs_cluster" {
+  type        = "string"
+  description = "The ecs cluster where the services will run (for the security group)."
+  default     = "default"
+}
