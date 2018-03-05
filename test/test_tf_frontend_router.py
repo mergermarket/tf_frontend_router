@@ -443,10 +443,10 @@ Plan: 6 to add, 0 to change, 0 to destroy.
 
         # Then
         assert re.search(template_to_re("""
-      condition.{ident}.name:                    "response-503-condition"
-      condition.{ident}.priority:                "5"
-      condition.{ident}.statement:               "beresp.status == 503"
-      condition.{ident}.type:                    "CACHE"
+      condition.{ident}.name:                     "response-503-condition"
+      condition.{ident}.priority:                 "5"
+      condition.{ident}.statement:                "beresp.status == 503 && req.http.Cookie:viewerror != \\"true\\""
+      condition.{ident}.type:                     "CACHE"
         """.strip()), output) # noqa
 
     def test_create_fastly_config_response_503_definition(self):
@@ -622,7 +622,7 @@ Plan: 6 to add, 0 to change, 0 to destroy.
         assert re.search(template_to_re("""
       condition.{ident}.name:                    "response-502-condition"
       condition.{ident}.priority:                "5"
-      condition.{ident}.statement:               "beresp.status == 502"
+      condition.{ident}.statement:               "beresp.status == 502 && req.http.Cookie:viewerror != \\"true\\""
       condition.{ident}.type:                    "CACHE"
         """.strip()), output) # noqa
 
