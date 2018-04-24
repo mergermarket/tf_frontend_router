@@ -793,3 +793,28 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       source:                                        "token"
       token:                                         <computed>
         """.strip() in output # noqa
+
+    def test_fastly_shield(self):
+        # Given
+
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=dev',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var', 'shield=test-shield',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color',
+            '-target=module.frontend_router_shield.module.fastly.fastly_service_v1.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
+
+        # Then
+        assert re.search(r'backend.~\d+.shield:\s+"test-shield"', output)
