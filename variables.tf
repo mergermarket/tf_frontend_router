@@ -185,3 +185,9 @@ variable "ecs_cluster" {
   description = "The ecs cluster where the services will run (for the security group)."
   default     = "default"
 }
+
+variable "shield" {
+  type        = "string"
+  description = "PoP to use as an origin shield (e.g. london-uk for Slough)."
+  default     = ""
+}

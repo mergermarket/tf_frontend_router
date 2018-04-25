@@ -17,4 +17,5 @@ module "fastly" {
   custom_vcl_error          = "${var.custom_vcl_error}"
   bypass_busy_wait          = "${var.bypass_busy_wait}"
   proxy_error_response      = "${var.proxy_error_response}"
+  shield                    = "${var.shield}"
 }

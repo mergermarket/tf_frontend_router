@@ -303,7 +303,7 @@ Plan: 6 to add, 0 to change, 0 to destroy.
         """.strip()), output) # noqa
 
         assert re.search(template_to_re("""
-      default_host:                                 "foo-externaldomain.com"
+      default_host:                                 <computed>
       default_ttl:                                  "60"
       domain.#:                                     "1"
       domain.{ident}.comment:                    ""
@@ -335,13 +335,13 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       request_setting.{ident}.action:            ""
       request_setting.{ident}.bypass_busy_wait:  "false"
       request_setting.{ident}.default_host:      ""
-      request_setting.{ident}.force_miss:        "false"
+      request_setting.{ident}.force_miss:        ""
       request_setting.{ident}.force_ssl:         "false"
       request_setting.{ident}.geo_headers:       ""
       request_setting.{ident}.hash_keys:         ""
       request_setting.{ident}.max_stale_age:     ""
-      request_setting.{ident}.name:              "disable caching"
-      request_setting.{ident}.request_condition: "all_urls"
+      request_setting.{ident}.name:              "request-setting"
+      request_setting.{ident}.request_condition: ""
       request_setting.{ident}.timer_support:     ""
       request_setting.{ident}.xff:               "append"
         """.strip()), output)
@@ -393,34 +393,6 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       backend.~{ident}.use_ssl:                  "true"
       backend.~{ident}.weight:                   "100"
         """.strip()), output)
-
-
-    def test_create_fastly_config_all_urls_condition(self):
-        # When
-        output = check_output([
-            'terraform',
-            'plan',
-            '-var', 'env=foo',
-            '-var', 'component=foobar',
-            '-var', 'team=foobar',
-            '-var', 'fastly_domain=externaldomain.com',
-            '-var', 'alb_domain=domain.com',
-            '-var-file={}/test/platform-config/eu-west-1.json'.format(
-                self.base_path
-            ),
-            '-no-color',
-            '-target=module.frontend_router.module.fastly', # noqa
-        ] + [self.module_path], env=self._env_for_check_output(
-            'qwerty'
-        ), cwd=self.workdir).decode('utf-8')
-
-        # Then
-        assert re.search(template_to_re("""
-      condition.{ident}.name:                     "all_urls"
-      condition.{ident}.priority:                 "10"
-      condition.{ident}.statement:                "req.url ~ \\".*\\""
-      condition.{ident}.type:                     "REQUEST"
-        """.strip()), output) # noqa
 
     def test_create_fastly_config_response_503_condition(self):
         # When
@@ -510,13 +482,13 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       request_setting.{ident}.action:            ""
       request_setting.{ident}.bypass_busy_wait:  "false"
       request_setting.{ident}.default_host:      ""
-      request_setting.{ident}.force_miss:        "false"
+      request_setting.{ident}.force_miss:        ""
       request_setting.{ident}.force_ssl:         "true"
       request_setting.{ident}.geo_headers:       ""
       request_setting.{ident}.hash_keys:         ""
       request_setting.{ident}.max_stale_age:     ""
-      request_setting.{ident}.name:              "disable caching"
-      request_setting.{ident}.request_condition: "all_urls"
+      request_setting.{ident}.name:              "request-setting"
+      request_setting.{ident}.request_condition: ""
       request_setting.{ident}.timer_support:     ""
       request_setting.{ident}.xff:               "append"
         """.strip()), output) # noqa
@@ -721,17 +693,26 @@ Plan: 6 to add, 0 to change, 0 to destroy.
         """.strip() in output # noqa
 
         assert re.search(template_to_re("""
+      cache_setting.#:                              "1"
+      cache_setting.{ident}.action:              "pass"
+      cache_setting.{ident}.cache_condition:     ""
+      cache_setting.{ident}.name:                "cache-setting"
+      cache_setting.{ident}.stale_ttl:           ""
+      cache_setting.{ident}.ttl:                 ""
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
       request_setting.#:                            "1"
       request_setting.{ident}.action:            ""
       request_setting.{ident}.bypass_busy_wait:  "false"
       request_setting.{ident}.default_host:      ""
-      request_setting.{ident}.force_miss:        "true"
+      request_setting.{ident}.force_miss:        ""
       request_setting.{ident}.force_ssl:         "true"
       request_setting.{ident}.geo_headers:       ""
       request_setting.{ident}.hash_keys:         ""
       request_setting.{ident}.max_stale_age:     ""
-      request_setting.{ident}.name:              "disable caching"
-      request_setting.{ident}.request_condition: "all_urls"
+      request_setting.{ident}.name:              "request-setting"
+      request_setting.{ident}.request_condition: ""
       request_setting.{ident}.timer_support:     ""
       request_setting.{ident}.xff:               "append"
         """.strip()), output) # noqa
@@ -812,3 +793,28 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       source:                                        "token"
       token:                                         <computed>
         """.strip() in output # noqa
+
+    def test_fastly_shield(self):
+        # Given
+
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=dev',
+            '-var', 'component=foobar',
+            '-var', 'team=foobar',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var', 'shield=test-shield',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color',
+            '-target=module.frontend_router_shield.module.fastly.fastly_service_v1.fastly', # noqa
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
+
+        # Then
+        assert re.search(r'backend.~\d+.shield:\s+"test-shield"', output)
