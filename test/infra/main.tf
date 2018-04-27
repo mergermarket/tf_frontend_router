@@ -24,6 +24,7 @@ module "frontend_router" {
   env             = "${var.env}"
   component       = "${var.component}"
   platform_config = "${var.platform_config}"
+  force_ssl       = "${var.force_ssl}"
 
   # optional
   # backend_ip = "1.1.1.1"
@@ -55,6 +56,18 @@ module "frontend_router_timeouts" {
   connect_timeout       = "${var.connect_timeout}"
   first_byte_timeout    = "${var.first_byte_timeout}"
   between_bytes_timeout = "${var.between_bytes_timeout}"
+}
+
+module "frontend_router_shield" {
+  source = "../.."
+
+  fastly_domain         = "${var.fastly_domain}"
+  alb_domain            = "${var.alb_domain}"
+  team                  = "${var.team}"
+  env                   = "${var.env}"
+  component             = "${var.component}"
+  platform_config       = "${var.platform_config}"
+  shield                = "${var.shield}"
 }
 
 # variables
@@ -92,4 +105,14 @@ variable "between_bytes_timeout" {
   type        = "string"
   description = ""
   default     = 30000
+}
+
+variable "force_ssl" {
+  type    = "string"
+  default = "true"
+}
+
+variable "shield" {
+  type    = "string"
+  default = ""
 }
