@@ -22,11 +22,11 @@ def template_to_re(t):
     """
     seen = dict()
 
-    def pattern(placeholder, open_curly, close_curly, text, hspace):
+    def pattern(placeholder, open_curly, close_curly, text, whitespace):
         if text is not None:
             return re.escape(text)
-        elif hspace is not None:
-            return r'[ \t]+'
+        elif whitespace is not None:
+            return r'\s+'
         elif open_curly is not None:
             return r'\{'
         elif close_curly is not None:
@@ -39,7 +39,9 @@ def template_to_re(t):
 
     return "".join([
         pattern(*match.groups())
-        for match in re.finditer(r'{([\w_]+)}|(\{\{)|(\}\})|([^{}]+)|([ \t]+)', t)
+        for match in re.finditer(
+            r'{([\w_]+)}|(\{\{)|(\}\})|([^{}\s]+)|(\s+)', t
+        )
     ])
 
 
@@ -693,12 +695,18 @@ Plan: 6 to add, 0 to change, 0 to destroy.
         """.strip() in output # noqa
 
         assert re.search(template_to_re("""
-      cache_setting.#:                              "1"
-      cache_setting.{ident}.action:              "pass"
-      cache_setting.{ident}.cache_condition:     ""
-      cache_setting.{ident}.name:                "cache-setting"
-      cache_setting.{ident}.stale_ttl:           ""
-      cache_setting.{ident}.ttl:                 ""
+      cache_setting.{ident}.action:               "pass"
+      cache_setting.{ident}.cache_condition:      "prevent-caching"
+      cache_setting.{ident}.name:                 "cache-setting"
+      cache_setting.{ident}.stale_ttl:            ""
+      cache_setting.{ident}.ttl:                  ""
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
+      condition.{ident}.name:                    "prevent-caching"
+      condition.{ident}.priority:                "5"
+      condition.{ident}.statement:               "req.url ~ \\"^\\""
+      condition.{ident}.type:                    "CACHE"
         """.strip()), output) # noqa
 
         assert re.search(template_to_re("""
