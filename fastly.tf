@@ -20,4 +20,5 @@ module "fastly" {
   bypass_busy_wait            = "${var.bypass_busy_wait}"
   proxy_error_response        = "${var.proxy_error_response}"
   shield                      = "${var.shield}"
+  surrogate_key_name          = "${var.surrogate_key_name}"
 }
