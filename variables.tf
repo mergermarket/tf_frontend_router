@@ -141,3 +141,9 @@ variable "bypass_busy_wait" {
   description = "Disable collapsed forwarding, so you don't wait for other objects to origin."
   default = "false"
 }
+
+variable "surrogate_key_name" {
+  type        = "string"
+  description = "Fastly surrogate key name"
+  default     = "default-surrogate-key"
+}
