@@ -36,6 +36,10 @@ module "dns_record" {
   alias       = "1"
 }
 
+locals {
+  default_target_group_component = "${var.default_target_group_component != "" ? var.default_target_group_component : "${var.component}-default-target-group"}"
+}
+
 resource "aws_alb_target_group" "default_target_group" {
   name = "${replace(replace("${var.env}-default-${var.component}", "/(.{0,32}).*/", "$1"), "/^-+|-+$/", "")}"
 
@@ -53,5 +57,12 @@ resource "aws_alb_target_group" "default_target_group" {
     healthy_threshold   = "${var.default_target_group_health_check_healthy_threshold}"
     unhealthy_threshold = "${var.default_target_group_health_check_unhealthy_threshold}"
     matcher             = "${var.default_target_group_health_check_matcher}"
+  }
+
+  tags {
+    component   = "${local.default_target_group_component}"
+    environment = "${var.env}"
+    service     = "${var.env}-${local.default_target_group_component}"
+    team        = "${var.team}"
   }
 }
