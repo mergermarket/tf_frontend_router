@@ -13,8 +13,6 @@ ENV TERRAFORM_PROVIDER_EXTERNAL_VERSION=1.0.0
 ENV TERRAFORM_PROVIDER_TLS_VERSION=1.0.1
 ENV TERRAFORM_PROVIDER_DATADOG_VERSION=1.0.3
 
-RUN echo http://dl-cdn.alpinelinux.org/alpine/latest-stable/main >> /etc/apk/repositories
-RUN apk update
 RUN apk -U add gcc musl-dev libffi-dev openssl-dev docker curl git zip unzip wget
 
 RUN cd /tmp && \
