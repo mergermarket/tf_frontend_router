@@ -670,61 +670,6 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       gzip.{ident}.name:                         "file extensions and content types"
         """.strip()), output) # noqa
 
-    def test_create_fastly_config_disable_fastly_caching(self):
-        # When
-        output = check_output([
-            'terraform',
-            'plan',
-            '-var', 'env=foo',
-            '-var', 'component=foobar',
-            '-var', 'team=foobar',
-            '-var', 'fastly_domain=externaldomain.com',
-            '-var', 'alb_domain=domain.com',
-            '-var-file={}/test/platform-config/eu-west-1.json'.format(
-                self.base_path
-            ),
-            '-no-color',
-            '-target=module.frontend_router_disable_fastly_caching.module.fastly', # noqa
-        ] + [self.module_path], env=self._env_for_check_output(
-            'qwerty'
-        ), cwd=self.workdir).decode('utf-8')
-
-        # Then
-        assert """
-  + module.frontend_router_disable_fastly_caching.module.fastly.fastly_service_v1.fastly
-        """.strip() in output # noqa
-
-        assert re.search(template_to_re("""
-      cache_setting.{ident}.action:               "pass"
-      cache_setting.{ident}.cache_condition:      "prevent-caching"
-      cache_setting.{ident}.name:                 "cache-setting"
-      cache_setting.{ident}.stale_ttl:            ""
-      cache_setting.{ident}.ttl:                  ""
-        """.strip()), output) # noqa
-
-        assert re.search(template_to_re("""
-      condition.{ident}.name:                    "prevent-caching"
-      condition.{ident}.priority:                "5"
-      condition.{ident}.statement:               "req.url ~ \\"^\\""
-      condition.{ident}.type:                    "CACHE"
-        """.strip()), output) # noqa
-
-        assert re.search(template_to_re("""
-      request_setting.#:                            "1"
-      request_setting.{ident}.action:            ""
-      request_setting.{ident}.bypass_busy_wait:  "false"
-      request_setting.{ident}.default_host:      ""
-      request_setting.{ident}.force_miss:        ""
-      request_setting.{ident}.force_ssl:         "true"
-      request_setting.{ident}.geo_headers:       ""
-      request_setting.{ident}.hash_keys:         ""
-      request_setting.{ident}.max_stale_age:     ""
-      request_setting.{ident}.name:              "request-setting"
-      request_setting.{ident}.request_condition: ""
-      request_setting.{ident}.timer_support:     ""
-      request_setting.{ident}.xff:               "append"
-        """.strip()), output) # noqa
-
     def test_custom_timeouts(self):
         # When
         output = check_output([
@@ -826,3 +771,66 @@ Plan: 6 to add, 0 to change, 0 to destroy.
 
         # Then
         assert re.search(r'backend.~\d+.shield:\s+"test-shield"', output)
+
+    def test_default_target_group_default_tags(self):
+        # Given
+
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=test-environment',
+            '-var', 'component=test-component',
+            '-var', 'team=test-team',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color',
+            '-target=module.frontend_router.'
+            'aws_alb_target_group.default_target_group',
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
+
+        # Then
+        assert re.search(template_to_re("""
+      tags.%:                             "4"
+      tags.component:                     "test-component-default-target-group"
+      tags.environment:                   "test-environment"
+      tags.service:                       "test-environment-test-component-default-target-group"
+      tags.team:                          "test-team"
+        """.strip()), output) # noqa
+
+    def test_default_target_group_component_tags(self):
+        # Given
+
+        # When
+        output = check_output([
+            'terraform',
+            'plan',
+            '-var', 'env=test-environment',
+            '-var', 'component=test-component',
+            '-var', 'team=test-team',
+            '-var', 'default_target_group_component=test-def-tg-component',
+            '-var', 'fastly_domain=externaldomain.com',
+            '-var', 'alb_domain=domain.com',
+            '-var-file={}/test/platform-config/eu-west-1.json'.format(
+                self.base_path
+            ),
+            '-no-color',
+            '-target=module.frontend_router.'
+            'aws_alb_target_group.default_target_group',
+        ] + [self.module_path], env=self._env_for_check_output(
+            'qwerty'
+        ), cwd=self.workdir).decode('utf-8')
+
+        # Then
+        assert re.search(template_to_re("""
+      tags.%:                             "4"
+      tags.component:                     "test-def-tg-component"
+      tags.environment:                   "test-environment"
+      tags.service:                       "test-environment-test-def-tg-component"
+      tags.team:                          "test-team"
+        """.strip()), output) # noqa

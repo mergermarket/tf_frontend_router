@@ -130,6 +130,12 @@ variable "default_target_group_health_check_matcher" {
   default     = "200-299"
 }
 
+variable "default_target_group_component" {
+  description = "The name of the component that the default target group routes to - use this to ensure ALB logs are tagged correctly (the default will be to base it on the router name)"
+  type        = "string"
+  default     = ""
+}
+
 variable "custom_vcl_backends" {
   type        = "string"
   description = "Custom VCL to add at the top level (e.g. for defining backends)"

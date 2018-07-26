@@ -18,13 +18,14 @@ provider "logentries" {
 module "frontend_router" {
   source = "../.."
 
-  fastly_domain   = "${var.fastly_domain}"
-  alb_domain      = "${var.alb_domain}"
-  team            = "${var.team}"
-  env             = "${var.env}"
-  component       = "${var.component}"
-  platform_config = "${var.platform_config}"
-  force_ssl       = "${var.force_ssl}"
+  fastly_domain                  = "${var.fastly_domain}"
+  alb_domain                     = "${var.alb_domain}"
+  team                           = "${var.team}"
+  env                            = "${var.env}"
+  component                      = "${var.component}"
+  platform_config                = "${var.platform_config}"
+  force_ssl                      = "${var.force_ssl}"
+  default_target_group_component = "${var.default_target_group_component}"
 
   # optional
   # backend_ip = "1.1.1.1"
@@ -83,6 +84,10 @@ variable "component" {}
 
 variable "backend_ip" {
   default = "404"
+}
+
+variable "default_target_group_component" {
+  default = ""
 }
 
 variable "platform_config" {
