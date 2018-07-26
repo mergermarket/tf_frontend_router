@@ -58,6 +58,12 @@ variable "ssl_cert_hostname" {
   default     = ""
 }
 
+variable "force_ssl" {
+  type        = "string"
+  description = "Whether or not to force SSL (redirect requests to HTTP to HTTPS)"
+  default     = "true"
+}
+
 variable "fastly_caching" {
   description = "Whether to enable / forcefully disable caching on Fastly (default: true)"
   type        = "string"
@@ -82,40 +88,52 @@ variable "between_bytes_timeout" {
   default     = 30000
 }
 
-variable "health_check_interval" {
+variable "default_target_group_deregistration_delay" {
+  description = "The amount time for Elastic Load Balancing to wait before changing the state of a deregistering target from draining to unused. The range is 0-3600 seconds."
+  type        = "string"
+  default     = "10"
+}
+
+variable "default_target_group_health_check_interval" {
   description = "The approximate amount of time, in seconds, between health checks of an individual target. Minimum value 5 seconds, Maximum value 300 seconds."
   type        = "string"
   default     = "5"
 }
 
-variable "health_check_path" {
+variable "default_target_group_health_check_path" {
   description = "The destination for the health check request."
   type        = "string"
   default     = "/internal/healthcheck"
 }
 
-variable "health_check_timeout" {
+variable "default_target_group_health_check_timeout" {
   description = "The amount of time, in seconds, during which no response means a failed health check."
   type        = "string"
   default     = "4"
 }
 
-variable "health_check_healthy_threshold" {
+variable "default_target_group_health_check_healthy_threshold" {
   description = "The number of consecutive health checks successes required before considering an unhealthy target healthy."
   type        = "string"
   default     = "2"
 }
 
-variable "health_check_unhealthy_threshold" {
+variable "default_target_group_health_check_unhealthy_threshold" {
   description = "The number of consecutive health check failures required before considering the target unhealthy."
   type        = "string"
   default     = "2"
 }
 
-variable "health_check_matcher" {
+variable "default_target_group_health_check_matcher" {
   description = "The HTTP codes to use when checking for a successful response from a target. You can specify multiple values (for example, \"200,202\") or a range of values (for example, \"200-299\")."
   type        = "string"
   default     = "200-299"
+}
+
+variable "default_target_group_component" {
+  description = "The name of the component that the default target group routes to - use this to ensure ALB logs are tagged correctly (the default will be to base it on the router name)"
+  type        = "string"
+  default     = ""
 }
 
 variable "custom_vcl_backends" {
@@ -126,8 +144,26 @@ variable "custom_vcl_backends" {
 
 variable "custom_vcl_recv" {
   type        = "string"
-  description = "Custom VCL to add to the vcl_recv sub after the Fastly hook"
+  description = "Custom VCL to add to the vcl_recv sub after the Fastly hook - this will run regardless of whether running on a shield node"
   default     = ""
+}
+
+variable "custom_vcl_recv_shield_only" {
+  type        = "string"
+  description = "Custom VCL to add to the vcl_recv sub after the Fastly hook, only on shield nodes"
+  default     = ""
+}
+
+variable "custom_vcl_recv_no_shield" {
+  type        = "string"
+  description = "Custom VCL to add to the vcl_recv sub after the Fastly hook, but not on shield nodes"
+  default     = ""
+}
+
+variable "default_target_group_target_type" {
+  description = "The type of target that you must specify when registering targets with the default target group. The possible values are instance (targets are specified by instance ID) or ip (targets are specified by IP address). The default is instance."
+  type        = "string"
+  default     = "instance"
 }
 
 variable "custom_vcl_error" {
@@ -140,4 +176,42 @@ variable "bypass_busy_wait" {
   type = "string"
   description = "Disable collapsed forwarding, so you don't wait for other objects to origin."
   default = "false"
+}
+
+variable "proxy_error_response" {
+  type        = "string"
+  description = "The html error document to send for a proxy error - 502/503 from backend, or no response from backend at all."
+
+  default = <<EOF
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Service Unavailable</title>
+  </head>
+  <body>
+    <h1>Service Unavailable</h1>
+    <p>
+      The site you requested is currently unavailable.
+    </p>
+  </body>
+</html>
+EOF
+}
+
+variable "ecs_cluster" {
+  type        = "string"
+  description = "The ecs cluster where the services will run (for the security group)."
+  default     = "default"
+}
+
+variable "shield" {
+  type        = "string"
+  description = "PoP to use as an origin shield (e.g. london-uk for Slough)."
+  default     = ""
+}
+
+variable "surrogate_key_name" {
+  type        = "string"
+  description = "Fastly surrogate key name"
+  default     = "default-surrogate-key"
 }

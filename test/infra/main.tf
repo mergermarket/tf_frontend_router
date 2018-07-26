@@ -18,12 +18,14 @@ provider "logentries" {
 module "frontend_router" {
   source = "../.."
 
-  fastly_domain   = "${var.fastly_domain}"
-  alb_domain      = "${var.alb_domain}"
-  team            = "${var.team}"
-  env             = "${var.env}"
-  component       = "${var.component}"
-  platform_config = "${var.platform_config}"
+  fastly_domain                  = "${var.fastly_domain}"
+  alb_domain                     = "${var.alb_domain}"
+  team                           = "${var.team}"
+  env                            = "${var.env}"
+  component                      = "${var.component}"
+  platform_config                = "${var.platform_config}"
+  force_ssl                      = "${var.force_ssl}"
+  default_target_group_component = "${var.default_target_group_component}"
 
   # optional
   # backend_ip = "1.1.1.1"
@@ -57,6 +59,18 @@ module "frontend_router_timeouts" {
   between_bytes_timeout = "${var.between_bytes_timeout}"
 }
 
+module "frontend_router_shield" {
+  source = "../.."
+
+  fastly_domain         = "${var.fastly_domain}"
+  alb_domain            = "${var.alb_domain}"
+  team                  = "${var.team}"
+  env                   = "${var.env}"
+  component             = "${var.component}"
+  platform_config       = "${var.platform_config}"
+  shield                = "${var.shield}"
+}
+
 # variables
 variable "fastly_domain" {}
 
@@ -70,6 +84,10 @@ variable "component" {}
 
 variable "backend_ip" {
   default = "404"
+}
+
+variable "default_target_group_component" {
+  default = ""
 }
 
 variable "platform_config" {
@@ -92,4 +110,14 @@ variable "between_bytes_timeout" {
   type        = "string"
   description = ""
   default     = 30000
+}
+
+variable "force_ssl" {
+  type    = "string"
+  default = "true"
+}
+
+variable "shield" {
+  type    = "string"
+  default = ""
 }
