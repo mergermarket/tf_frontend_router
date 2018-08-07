@@ -17,6 +17,7 @@ module "fastly" {
   custom_vcl_recv_no_shield   = "${var.custom_vcl_recv_no_shield}"
   custom_vcl_recv_shield_only = "${var.custom_vcl_recv_shield_only}"
   custom_vcl_error            = "${var.custom_vcl_error}"
+  custom_vcl_deliver          = "${var.custom_vcl_deliver}"
   bypass_busy_wait            = "${var.bypass_busy_wait}"
   proxy_error_response        = "${var.proxy_error_response}"
   shield                      = "${var.shield}"
