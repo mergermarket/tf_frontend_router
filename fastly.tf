@@ -14,5 +14,6 @@ module "fastly" {
   custom_vcl_backends       = "${var.custom_vcl_backends}"
   custom_vcl_recv           = "${var.custom_vcl_recv}"
   custom_vcl_error          = "${var.custom_vcl_error}"
+  custom_vcl_deliver        = "${var.custom_vcl_deliver}"
   bypass_busy_wait          = "${var.bypass_busy_wait}"
 }
