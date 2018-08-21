@@ -147,3 +147,23 @@ variable "bypass_busy_wait" {
   description = "Disable collapsed forwarding, so you don't wait for other objects to origin."
   default = "false"
 }
+
+variable "proxy_error_response" {
+  type        = "string"
+  description = "The html error document to send for a proxy error - 502/503 from backend, or no response from backend at all."
+
+  default = <<EOF
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Service Unavailable</title>
+  </head>
+  <body>
+    <h1>Service Unavailable</h1>
+    <p>
+      The site you requested is currently unavailable.
+    </p>
+  </body>
+</html>
+EOF
+}
