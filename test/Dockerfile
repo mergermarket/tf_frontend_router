@@ -5,7 +5,6 @@ ENV TERRAFORM_VERSION=0.11.1
 
 ENV TERRAFORM_PROVIDER_AWS_VERSION=1.6.0
 ENV TERRAFORM_PROVIDER_FASTLY_VERSION=0.1.3
-ENV TERRAFORM_PROVIDER_LOGENTRIES_VERSION=0.1.0_logset_datasource
 ENV TERRAFORM_PROVIDER_NULL_VERSION=1.0.0
 ENV TERRAFORM_PROVIDER_TEMPLATE_VERSION=1.0.0
 ENV TERRAFORM_PROVIDER_ACME_VERSION=0.3.0
@@ -24,8 +23,6 @@ RUN cd /tmp && \
         unzip terraform-provider-aws_*_linux_amd64.zip -d /usr/bin && \
     curl -sSLO https://releases.hashicorp.com/terraform-provider-fastly/$TERRAFORM_PROVIDER_FASTLY_VERSION/terraform-provider-fastly_${TERRAFORM_PROVIDER_FASTLY_VERSION}_linux_amd64.zip && \
         unzip terraform-provider-fastly_*_linux_amd64.zip -d /usr/bin && \
-    wget -q https://s3-eu-west-1.amazonaws.com/mmg-terraform-providers/terraform-provider-logentries_v${TERRAFORM_PROVIDER_LOGENTRIES_VERSION}_linux_amd64.zip && \
-        unzip terraform-provider-logentries_*_linux_amd64.zip -d /usr/bin && \
     curl -sSLO https://releases.hashicorp.com/terraform-provider-null/$TERRAFORM_PROVIDER_NULL_VERSION/terraform-provider-null_${TERRAFORM_PROVIDER_NULL_VERSION}_linux_amd64.zip && \
         unzip terraform-provider-null_*_linux_amd64.zip -d /usr/bin && \
     curl -sSLO https://releases.hashicorp.com/terraform-provider-template/$TERRAFORM_PROVIDER_TEMPLATE_VERSION/terraform-provider-template_${TERRAFORM_PROVIDER_TEMPLATE_VERSION}_linux_amd64.zip && \
