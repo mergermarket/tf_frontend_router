@@ -1,4 +1,9 @@
 # required
+variable "dns_domain" {
+  description = "DNS domain to use for SSL certificate"
+  type        = "string"
+}
+
 variable "fastly_domain" {
   description = ""
   type        = "string"
