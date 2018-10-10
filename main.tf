@@ -26,14 +26,13 @@ module "alb" {
 }
 
 module "dns_record" {
-  source = "github.com/mergermarket/tf_route53_dns"
+  source = "github.com/mergermarket/tf_route53_dns?optional-dev-subdomain"
 
-  domain      = "${var.alb_domain}"
-  name        = "${var.component}"
-  env         = "${var.env}"
-  target      = "${module.alb.alb_dns_name}"
-  alb_zone_id = "${module.alb.alb_zone_id}"
-  alias       = "1"
+  dev_subdomain = "false"
+  domain        = "${var.alb_domain}"
+  name          = "${var.component}"
+  env           = "${var.env}"
+  target        = "${module.alb.alb_dns_name}"
 }
 
 locals {
