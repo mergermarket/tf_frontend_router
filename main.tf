@@ -26,7 +26,7 @@ module "alb" {
 }
 
 module "dns_record" {
-  source = "github.com/mergermarket/tf_route53_dns?optional-dev-subdomain"
+  source = "github.com/mergermarket/tf_route53_dns?ref=optional-dev-subdomain"
 
   dev_subdomain = "false"
   domain        = "${var.alb_domain}"
