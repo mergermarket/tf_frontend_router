@@ -207,21 +207,7 @@ EOF
 variable "proxy_not_found_response" {
   type        = "string"
   description = "The html error document to send for a not found error"
-
-  default = <<EOF
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Page not found</title>
-  </head>
-  <body>
-    <h1>Page not found</h1>
-    <p>
-    The page you requested could not be found
-    </p>
-  </body>
-</html>
-EOF
+  default     = "" 
 }
 
 variable "ecs_cluster" {
