@@ -204,9 +204,15 @@ variable "proxy_error_response" {
 EOF
 }
 
-variable "proxy_not_found_response" {
+variable "not_found_response" {
   type        = "string"
   description = "The html error document to send for a not found error"
+  default     = "" 
+}
+
+variable "error_response" {
+  type        = "string"
+  description = "The html error document to send for a server error"
   default     = "" 
 }
 
