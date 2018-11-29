@@ -204,6 +204,18 @@ variable "proxy_error_response" {
 EOF
 }
 
+variable "not_found_response" {
+  type        = "string"
+  description = "The html error document to send for a not found error"
+  default     = "" 
+}
+
+variable "error_response" {
+  type        = "string"
+  description = "The html error document to send for a server error"
+  default     = "" 
+}
+
 variable "ecs_cluster" {
   type        = "string"
   description = "The ecs cluster where the services will run (for the security group)."

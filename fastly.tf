@@ -20,6 +20,8 @@ module "fastly" {
   custom_vcl_deliver          = "${var.custom_vcl_deliver}"
   bypass_busy_wait            = "${var.bypass_busy_wait}"
   proxy_error_response        = "${var.proxy_error_response}"
+  not_found_response          = "${var.not_found_response}"
+  error_response              = "${var.error_response}"
   shield                      = "${var.shield}"
   surrogate_key_name          = "${var.surrogate_key_name}"
 }
