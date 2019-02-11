@@ -11,9 +11,6 @@ provider "aws" {
   region                      = "eu-west-1"
 }
 
-provider "logentries" {
-  account_key = "dummy"
-}
 
 module "frontend_router" {
   source = "../.."
@@ -26,6 +23,7 @@ module "frontend_router" {
   platform_config                = "${var.platform_config}"
   force_ssl                      = "${var.force_ssl}"
   default_target_group_component = "${var.default_target_group_component}"
+  run_data                       = false
 
   # optional
   # backend_ip = "1.1.1.1"
@@ -40,6 +38,7 @@ module "frontend_router_disable_fastly_caching" {
   env             = "${var.env}"
   component       = "${var.component}"
   platform_config = "${var.platform_config}"
+  run_data        = false
 
   # optional
   fastly_caching = "false"
@@ -57,6 +56,7 @@ module "frontend_router_timeouts" {
   connect_timeout       = "${var.connect_timeout}"
   first_byte_timeout    = "${var.first_byte_timeout}"
   between_bytes_timeout = "${var.between_bytes_timeout}"
+  run_data              = false
 }
 
 module "frontend_router_shield" {
@@ -69,6 +69,7 @@ module "frontend_router_shield" {
   component             = "${var.component}"
   platform_config       = "${var.platform_config}"
   shield                = "${var.shield}"
+  run_data              = false
 }
 
 # variables

@@ -109,7 +109,7 @@ class TestTFFrontendRouter(unittest.TestCase):
 
         # Then
         assert """
-Plan: 6 to add, 0 to change, 0 to destroy.
+Plan: 5 to add, 0 to change, 0 to destroy.
         """.strip() in output
 
     @settings(max_examples=5)
@@ -160,17 +160,18 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       id:                                    <computed>
       access_logs.#:                         "1"
       access_logs.0.enabled:                 "false"
-      access_logs.0.prefix:                  <computed>
       arn:                                   <computed>
       arn_suffix:                            <computed>
       dns_name:                              <computed>
       enable_deletion_protection:            "false"
+      enable_http2:                          "true"
       idle_timeout:                          "60"
       internal:                              "false"
       ip_address_type:                       <computed>
       load_balancer_type:                    "application"
       name:                                  "{}-router"
       security_groups.#:                     <computed>
+      subnet_mapping.#:                      <computed>
       subnets.#:                             "3"
       subnets.{{ident1}}:                    "subnet-55555555"
       subnets.{{ident2}}:                    "subnet-33333333"
@@ -208,8 +209,8 @@ Plan: 6 to add, 0 to change, 0 to destroy.
   + module.frontend_router.module.alb.aws_alb_listener.https
       id:                                    <computed>
       arn:                                   <computed>
-      certificate_arn:                       "${module.aws_acm_certificate_arn.arn}"
       default_action.#:                      "1"
+      default_action.0.order:                <computed>
       default_action.0.target_group_arn:     "${var.default_target_group_arn}"
       default_action.0.type:                 "forward"
       load_balancer_arn:                     "${aws_alb.alb.arn}"
@@ -239,45 +240,50 @@ Plan: 6 to add, 0 to change, 0 to destroy.
 
         # Then
         assert re.search(template_to_re("""
-  + module.frontend_router.module.alb.aws_security_group.default
-      id:                                    <computed>
-      description:                           "Managed by Terraform"
       egress.#:                              "1"
-      egress.{ident1}.cidr_blocks.#:        "1"
-      egress.{ident1}.cidr_blocks.0:        "0.0.0.0/0"
-      egress.{ident1}.description:          ""
-      egress.{ident1}.from_port:            "0"
-      egress.{ident1}.ipv6_cidr_blocks.#:   "0"
-      egress.{ident1}.prefix_list_ids.#:    "0"
-      egress.{ident1}.protocol:             "-1"
-      egress.{ident1}.security_groups.#:    "0"
-      egress.{ident1}.self:                 "false"
-      egress.{ident1}.to_port:              "0"
+      egress.{ident}.cidr_blocks.#:        "1"
+      egress.{ident}.cidr_blocks.0:        "0.0.0.0/0"
+      egress.{ident}.description:          ""
+      egress.{ident}.from_port:            "0"
+      egress.{ident}.ipv6_cidr_blocks.#:   "0"
+      egress.{ident}.prefix_list_ids.#:    "0"
+      egress.{ident}.protocol:             "-1"
+      egress.{ident}.security_groups.#:    "0"
+      egress.{ident}.self:                 "false"
+      egress.{ident}.to_port:              "0"
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
       ingress.#:                             "2"
-      ingress.{ident2}.cidr_blocks.#:      "1"
-      ingress.{ident2}.cidr_blocks.0:      "0.0.0.0/0"
-      ingress.{ident2}.description:        ""
-      ingress.{ident2}.from_port:          "80"
-      ingress.{ident2}.ipv6_cidr_blocks.#: "0"
-      ingress.{ident2}.protocol:           "tcp"
-      ingress.{ident2}.security_groups.#:  "0"
-      ingress.{ident2}.self:               "false"
-      ingress.{ident2}.to_port:            "80"
-      ingress.{ident3}.cidr_blocks.#:      "1"
-      ingress.{ident3}.cidr_blocks.0:      "0.0.0.0/0"
-      ingress.{ident3}.description:        ""
-      ingress.{ident3}.from_port:          "443"
-      ingress.{ident3}.ipv6_cidr_blocks.#: "0"
-      ingress.{ident3}.protocol:           "tcp"
-      ingress.{ident3}.security_groups.#:  "0"
-      ingress.{ident3}.self:               "false"
-      ingress.{ident3}.to_port:            "443"
-      name:                                  <computed>
-      owner_id:                              <computed>
+      ingress.{ident}.cidr_blocks.#:      "1"
+      ingress.{ident}.cidr_blocks.0:      "0.0.0.0/0"
+      ingress.{ident}.description:        ""
+      ingress.{ident}.from_port:          "80"
+      ingress.{ident}.ipv6_cidr_blocks.#: "0"
+      ingress.{ident}.prefix_list_ids.#:  "0"
+      ingress.{ident}.protocol:           "tcp"
+      ingress.{ident}.security_groups.#:  "0"
+      ingress.{ident}.self:               "false"
+      ingress.{ident}.to_port:            "80"
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
+      ingress.{ident}.cidr_blocks.#:      "1"
+      ingress.{ident}.cidr_blocks.0:      "0.0.0.0/0"
+      ingress.{ident}.description:        ""
+      ingress.{ident}.from_port:          "443"
+      ingress.{ident}.ipv6_cidr_blocks.#: "0"
+      ingress.{ident}.prefix_list_ids.#:  "0"
+      ingress.{ident}.protocol:           "tcp"
+      ingress.{ident}.security_groups.#:  "0"
+      ingress.{ident}.self:               "false"
+      ingress.{ident}.to_port:            "443"
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
       revoke_rules_on_delete:                "false"
       vpc_id:                                "vpc-12345678"
         """.strip()), output) # noqa
-
 
     def test_create_fastly_config(self):
 
@@ -305,7 +311,7 @@ Plan: 6 to add, 0 to change, 0 to destroy.
         """.strip()), output) # noqa
 
         assert re.search(template_to_re("""
-      default_host:                                 <computed>
+      default_host:                                 "foo-externaldomain.com"
       default_ttl:                                  "60"
       domain.#:                                     "1"
       domain.{ident}.comment:                    ""
@@ -703,49 +709,6 @@ Plan: 6 to add, 0 to change, 0 to destroy.
       backend.~{ident}.error_threshold:           "0"
       backend.~{ident}.first_byte_timeout:        "54321"
         """.strip()), output) # noqa
-
-    def test_fastly_logging_config(self):
-        # Given
-
-        # When
-        output = check_output([
-            'terraform',
-            'plan',
-            '-var', 'env=dev',
-            '-var', 'component=foobar',
-            '-var', 'team=foobar',
-            '-var', 'fastly_domain=externaldomain.com',
-            '-var', 'alb_domain=domain.com',
-            '-var-file={}/test/platform-config/eu-west-1.json'.format(
-                self.base_path
-            ),
-            '-no-color',
-            '-target=module.frontend_router_timeouts.module.fastly.fastly_service_v1.fastly', # noqa
-        ] + [self.module_path], env=self._env_for_check_output(
-            'qwerty'
-        ), cwd=self.workdir).decode('utf-8')
-
-        # Then
-        assert re.search(template_to_re("""
-      logentries.#:                                  "1"
-      logentries.~{ident}.format:                 "%h %l %u %t %r %>s"
-      logentries.~{ident}.format_version:         "1"
-      logentries.~{ident}.name:                   "dev-externaldomain.com"
-      logentries.~{ident}.port:                   "20000"
-      logentries.~{ident}.response_condition:     ""
-        """.strip()), output) # noqa
-
-        assert """
-  + module.frontend_router_timeouts.module.fastly.logentries_log.logs
-      id:                                            <computed>
-        """.strip() in output # noqa
-
-        assert """
-      name:                                          "dev-externaldomain.com"
-      retention_period:                              "ACCOUNT_DEFAULT"
-      source:                                        "token"
-      token:                                         <computed>
-        """.strip() in output # noqa
 
     def test_fastly_shield(self):
         # Given
