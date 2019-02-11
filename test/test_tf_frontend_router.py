@@ -149,25 +149,27 @@ Plan: 10 to add, 0 to change, 0 to destroy.
         # Then
         assert re.search(template_to_re("""
   + module.frontend_router.module.default_backend_ecs_service.aws_alb_target_group.target_group
-      id:                                        <computed>
-      arn:                                       <computed>
-      arn_suffix:                                <computed>
-      deregistration_delay:                      "10"
-      health_check.#:                            "1"
-      health_check.{{ident}}.healthy_threshold:          "2"
-      health_check.{{ident}}.interval:                   "5"
-      health_check.{{ident}}.matcher:                    "200-299"
-      health_check.{{ident}}.path:                       "/internal/healthcheck"
-      health_check.{{ident}}.port:                       "traffic-port"
-      health_check.{{ident}}.protocol:                   "HTTP"
-      health_check.{{ident}}.timeout:                    "4"
-      health_check.{{ident}}.unhealthy_threshold:        "2"
-      name:                                      "{}-default"
-      port:                                      "31337"
-      protocol:                                  "HTTP"
-      stickiness.#:                              <computed>
-      target_type:                               "instance"
-      vpc_id:                                    "vpc-12345678"
+      id:                                              <computed>
+      arn:                                             <computed>
+      arn_suffix:                                      <computed>
+      deregistration_delay:                            "10"
+      health_check.#:                                  "1"
+      health_check.{{ident}}.healthy_threshold:                "2"
+      health_check.{{ident}}.interval:                         "5"
+      health_check.{{ident}}.matcher:                          "200-299"
+      health_check.{{ident}}.path:                             "/internal/healthcheck"
+      health_check.{{ident}}.port:                             "traffic-port"
+      health_check.{{ident}}.protocol:                         "HTTP"
+      health_check.{{ident}}.timeout:                          "4"
+      health_check.{{ident}}.unhealthy_threshold:              "2"
+      name:                                            "{}-default"
+      port:                                            "31337"
+      protocol:                                        "HTTP"
+      proxy_protocol_v2:                               "false"
+      slow_start:                                      "0"
+      stickiness.#:                                    <computed>
+      target_type:                                     "instance"
+      vpc_id:                                          "vpc-12345678"
         """.format(expected_name).strip()), output) # noqa
 
 
@@ -192,26 +194,40 @@ Plan: 10 to add, 0 to change, 0 to destroy.
 
         assert """
   + module.frontend_router.module.default_backend_ecs_service.aws_ecs_service.service
-      id:                                        <computed>
-      cluster:                                   "default"
-      deployment_maximum_percent:                "200"
-      deployment_minimum_healthy_percent:        "100"
-      desired_count:                             "1"
+      id:                                              <computed>
+      cluster:                                         "default"
+      deployment_maximum_percent:                      "200"
+      deployment_minimum_healthy_percent:              "100"
+      desired_count:                                   "1"
+      enable_ecs_managed_tags:                         "false"
+      iam_role:                                        "${aws_iam_role.role.arn}"
+      launch_type:                                     "EC2"
         """.strip() in output # noqa
+
+        assert re.search(template_to_re("""
+      load_balancer.#:                                 "1"
+      load_balancer.{ident}.container_name:         "404"
+      load_balancer.{ident}.container_port:         "80"
+      load_balancer.{ident}.elb_name:               ""
+        """.strip()), output) # noqa
 
         assert """
-      name:                                      "foo-foobar-default"
+     name:                                            "foo-foobar-default"
         """.strip() in output # noqa
 
         assert re.search(template_to_re("""
-      placement_strategy.{ident1}.field:       "instanceId"
-      placement_strategy.{ident1}.type:        "spread"
+      placement_strategy.#:                            "2"
+      placement_strategy.{ident1}.field:             "instanceId"
+      placement_strategy.{ident1}.type:              "spread"
+      placement_strategy.{ident2}.field:             "attribute:ecs.availability-zone"
+      placement_strategy.{ident2}.type:              "spread"
+      platform_version:                                <computed>
+      scheduling_strategy:                             "REPLICA"
         """.strip()), output) # noqa
 
-        assert re.search(template_to_re("""
-      placement_strategy.{ident}.field:       "attribute:ecs.availability-zone"
-      placement_strategy.{ident}.type:        "spread"
-        """.strip()), output) # noqa
+        assert """
+      task_definition:                                 "${var.task_definition}"
+        """.strip() in output # noqa
 
     @settings(max_examples=5)
     @given(fixed_dictionaries({
@@ -259,17 +275,18 @@ Plan: 10 to add, 0 to change, 0 to destroy.
       id:                                    <computed>
       access_logs.#:                         "1"
       access_logs.0.enabled:                 "false"
-      access_logs.0.prefix:                  <computed>
       arn:                                   <computed>
       arn_suffix:                            <computed>
       dns_name:                              <computed>
       enable_deletion_protection:            "false"
+      enable_http2:                          "true"
       idle_timeout:                          "60"
       internal:                              "false"
       ip_address_type:                       <computed>
       load_balancer_type:                    "application"
       name:                                  "{}-router"
       security_groups.#:                     <computed>
+      subnet_mapping.#:                      <computed>
       subnets.#:                             "3"
       subnets.{{ident1}}:                    "subnet-55555555"
       subnets.{{ident2}}:                    "subnet-33333333"
@@ -309,6 +326,7 @@ Plan: 10 to add, 0 to change, 0 to destroy.
       arn:                                   <computed>
       certificate_arn:                       "${module.aws_acm_certificate_arn.arn}"
       default_action.#:                      "1"
+      default_action.0.order:                <computed>
       default_action.0.target_group_arn:     "${var.default_target_group_arn}"
       default_action.0.type:                 "forward"
       load_balancer_arn:                     "${aws_alb.alb.arn}"
@@ -338,43 +356,47 @@ Plan: 10 to add, 0 to change, 0 to destroy.
 
         # Then
         assert re.search(template_to_re("""
-  + module.frontend_router.module.alb.aws_security_group.default
-      id:                                    <computed>
-      description:                           "Managed by Terraform"
       egress.#:                              "1"
-      egress.{ident1}.cidr_blocks.#:        "1"
-      egress.{ident1}.cidr_blocks.0:        "0.0.0.0/0"
-      egress.{ident1}.description:          ""
-      egress.{ident1}.from_port:            "0"
-      egress.{ident1}.ipv6_cidr_blocks.#:   "0"
-      egress.{ident1}.prefix_list_ids.#:    "0"
-      egress.{ident1}.protocol:             "-1"
-      egress.{ident1}.security_groups.#:    "0"
-      egress.{ident1}.self:                 "false"
-      egress.{ident1}.to_port:              "0"
+      egress.{ident}.cidr_blocks.#:        "1"
+      egress.{ident}.cidr_blocks.0:        "0.0.0.0/0"
+      egress.{ident}.description:          ""
+      egress.{ident}.from_port:            "0"
+      egress.{ident}.ipv6_cidr_blocks.#:   "0"
+      egress.{ident}.prefix_list_ids.#:    "0"
+      egress.{ident}.protocol:             "-1"
+      egress.{ident}.security_groups.#:    "0"
+      egress.{ident}.self:                 "false"
+      egress.{ident}.to_port:              "0"
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
       ingress.#:                             "2"
-      ingress.{ident2}.cidr_blocks.#:      "1"
-      ingress.{ident2}.cidr_blocks.0:      "0.0.0.0/0"
-      ingress.{ident2}.description:        ""
-      ingress.{ident2}.from_port:          "80"
-      ingress.{ident2}.ipv6_cidr_blocks.#: "0"
-      ingress.{ident2}.protocol:           "tcp"
-      ingress.{ident2}.security_groups.#:  "0"
-      ingress.{ident2}.self:               "false"
-      ingress.{ident2}.to_port:            "80"
-      ingress.{ident3}.cidr_blocks.#:      "1"
-      ingress.{ident3}.cidr_blocks.0:      "0.0.0.0/0"
-      ingress.{ident3}.description:        ""
-      ingress.{ident3}.from_port:          "443"
-      ingress.{ident3}.ipv6_cidr_blocks.#: "0"
-      ingress.{ident3}.protocol:           "tcp"
-      ingress.{ident3}.security_groups.#:  "0"
-      ingress.{ident3}.self:               "false"
-      ingress.{ident3}.to_port:            "443"
-      name:                                  <computed>
-      owner_id:                              <computed>
+      ingress.{ident}.cidr_blocks.#:      "1"
+      ingress.{ident}.cidr_blocks.0:      "0.0.0.0/0"
+      ingress.{ident}.description:        ""
+      ingress.{ident}.from_port:          "80"
+      ingress.{ident}.ipv6_cidr_blocks.#: "0"
+      ingress.{ident}.prefix_list_ids.#:  "0"
+      ingress.{ident}.protocol:           "tcp"
+      ingress.{ident}.security_groups.#:  "0"
+      ingress.{ident}.self:               "false"
+      ingress.{ident}.to_port:            "80"
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
+      ingress.{ident}.cidr_blocks.#:      "1"
+      ingress.{ident}.cidr_blocks.0:      "0.0.0.0/0"
+      ingress.{ident}.description:        ""
+      ingress.{ident}.from_port:          "443"
+      ingress.{ident}.ipv6_cidr_blocks.#: "0"
+      ingress.{ident}.prefix_list_ids.#:  "0"
+      ingress.{ident}.protocol:           "tcp"
+      ingress.{ident}.security_groups.#:  "0"
+      ingress.{ident}.self:               "false"
+      ingress.{ident}.to_port:            "443"
+        """.strip()), output) # noqa
+
+        assert re.search(template_to_re("""
       revoke_rules_on_delete:                "false"
       vpc_id:                                "vpc-12345678"
         """.strip()), output) # noqa
-
-
