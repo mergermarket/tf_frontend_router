@@ -233,3 +233,14 @@ variable "surrogate_key_name" {
   description = "Fastly surrogate key name"
   default     = "default-surrogate-key"
 }
+
+variable "idle_timeout" {
+  description = "The time in seconds that the connection is allowed to be idle."
+  type        = "string"
+  default     = "60"
+}
+
+variable "run_data" {
+  description = "Used to switch off data resources when unit testing"
+  default     = true
+}
