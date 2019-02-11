@@ -24,4 +24,5 @@ module "fastly" {
   error_response              = "${var.error_response}"
   shield                      = "${var.shield}"
   surrogate_key_name          = "${var.surrogate_key_name}"
+  run_data                    = "${var.run_data}"
 }
