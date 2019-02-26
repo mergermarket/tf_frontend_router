@@ -9,7 +9,7 @@ module "404_container_definition" {
 }
 
 module "haproxy_proxy_container_definition" {
-  source = "github.com/mergermarket/tf_ecs_container_definition"
+  source = "github.com/mergermarket/tf_ecs_container_definition?ref=no-secrets"
 
   name           = "haproxy"
   image          = "mergermarket/haproxy-proxy"
