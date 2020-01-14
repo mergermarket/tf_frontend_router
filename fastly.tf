@@ -1,5 +1,5 @@
 module "fastly" {
-  source = "github.com/mergermarket/tf_fastly_frontend"
+  source = "github.com/mergermarket/tf_fastly_frontend?ref=fix-x-client-ip-header"
 
   domain_name                 = "${var.fastly_domain}"
   bare_redirect_domain_name   = "${var.bare_redirect_domain_name}"
