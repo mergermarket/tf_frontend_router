@@ -6,10 +6,6 @@ import unittest
 from string import ascii_lowercase
 from subprocess import check_call, check_output
 
-from hypothesis import example, given, settings
-from hypothesis.strategies import fixed_dictionaries, sampled_from, text
-
-
 def template_to_re(t):
     """
     Takes a template (i.e. what you'd call `.format(...)` on, and
@@ -112,24 +108,11 @@ class TestTFFrontendRouter(unittest.TestCase):
 Plan: 5 to add, 0 to change, 0 to destroy.
         """.strip() in output
 
-    @settings(max_examples=5)
-    @given(fixed_dictionaries({
-        'environment': text(alphabet=ascii_lowercase, min_size=1),
-        'component': text(alphabet=ascii_lowercase+'-', min_size=1).filter(lambda c: len(c.replace('-', ''))),
-        'team': text(alphabet=ascii_lowercase+'-', min_size=1).filter(lambda c: len(c.replace('-', ''))),
-    }))
-    @example({
-        'environment': 'live',
-        'component': 'a'*21,
-        'team': 'kubric',
-    })
-
-
-    def test_create_public_alb_in_public_subnets(self, fixtures):
+    def test_create_public_alb_in_public_subnets(self):
         # Given
-        env = fixtures['environment']
-        component = fixtures['component']
-        team = fixtures['team']
+        env = 'testenv'
+        component = 'testcomponent'
+        team = 'testteam'
 
         expected_name = re.sub(
             '^-+|-+$', '',
@@ -155,7 +138,7 @@ Plan: 5 to add, 0 to change, 0 to destroy.
         ), cwd=self.workdir).decode('utf-8')
 
         # Then
-        assert re.search(template_to_re("""
+        match = re.search(template_to_re("""
 + module.frontend_router.module.alb.aws_alb.alb
       id:                                    <computed>
       access_logs.#:                         "1"
@@ -163,6 +146,7 @@ Plan: 5 to add, 0 to change, 0 to destroy.
       arn:                                   <computed>
       arn_suffix:                            <computed>
       dns_name:                              <computed>
+      drop_invalid_header_fields:            "false"
       enable_deletion_protection:            "false"
       enable_http2:                          "true"
       idle_timeout:                          "60"
@@ -183,6 +167,10 @@ Plan: 5 to add, 0 to change, 0 to destroy.
       vpc_id:                                <computed>
       zone_id:                               <computed>
         """.format(expected_name, component, env, team).strip()), output) # noqa
+
+        if match is None:
+            print(output)
+        assert match is not None
 
     def test_create_public_alb_listener(self):
         # When
@@ -376,30 +364,31 @@ Plan: 5 to add, 0 to change, 0 to destroy.
         # Then
         assert re.search(template_to_re("""
       backend.#:                                    "1"
-      backend.~{ident}.address:                  "${{var.backend_address}}"
-      backend.~{ident}.auto_loadbalance:         "true"
-      backend.~{ident}.between_bytes_timeout:    "30000"
-      backend.~{ident}.connect_timeout:          "5000"
-      backend.~{ident}.error_threshold:          "0"
-      backend.~{ident}.first_byte_timeout:       "60000"
-      backend.~{ident}.healthcheck:              ""
-      backend.~{ident}.max_conn:                 "200"
-      backend.~{ident}.max_tls_version:          ""
-      backend.~{ident}.min_tls_version:          ""
-      backend.~{ident}.name:                     "default backend"
-      backend.~{ident}.port:                     "443"
-      backend.~{ident}.request_condition:        ""
-      backend.~{ident}.shield:                   ""
-      backend.~{ident}.ssl_ca_cert:              ""
-      backend.~{ident}.ssl_cert_hostname:        "${{var.ssl_cert_hostname}}"
-      backend.~{ident}.ssl_check_cert:           "true"
-      backend.~{ident}.ssl_ciphers:              ""
-      backend.~{ident}.ssl_client_cert:          <sensitive>
-      backend.~{ident}.ssl_client_key:           <sensitive>
-      backend.~{ident}.ssl_hostname:             ""
-      backend.~{ident}.ssl_sni_hostname:         ""
-      backend.~{ident}.use_ssl:                  "true"
-      backend.~{ident}.weight:                   "100"
+      backend.~{ident}.address:                   "${{var.backend_address}}"
+      backend.~{ident}.auto_loadbalance:          "true"
+      backend.~{ident}.between_bytes_timeout:     "30000"
+      backend.~{ident}.connect_timeout:           "5000"
+      backend.~{ident}.error_threshold:           "0"
+      backend.~{ident}.first_byte_timeout:        "60000"
+      backend.~{ident}.healthcheck:               ""
+      backend.~{ident}.max_conn:                  "200"
+      backend.~{ident}.max_tls_version:           ""
+      backend.~{ident}.min_tls_version:           ""
+      backend.~{ident}.name:                      "default backend"
+      backend.~{ident}.override_host:             ""
+      backend.~{ident}.port:                      "443"
+      backend.~{ident}.request_condition:         ""
+      backend.~{ident}.shield:                    ""
+      backend.~{ident}.ssl_ca_cert:               ""
+      backend.~{ident}.ssl_cert_hostname:         "${{var.ssl_cert_hostname}}"
+      backend.~{ident}.ssl_check_cert:            "true"
+      backend.~{ident}.ssl_ciphers:               ""
+      backend.~{ident}.ssl_client_cert:           <sensitive>
+      backend.~{ident}.ssl_client_key:            <sensitive>
+      backend.~{ident}.ssl_hostname:              ""
+      backend.~{ident}.ssl_sni_hostname:          ""
+      backend.~{ident}.use_ssl:                   "true"
+      backend.~{ident}.weight:                    "100"
         """.strip()), output)
 
     def test_create_fastly_config_response_503_condition(self):
