@@ -77,5 +77,5 @@ module "dns_record" {
   env         = "${var.env}"
   target      = "${module.alb.alb_dns_name}"
   alb_zone_id = "${module.alb.alb_zone_id}"
-  alias       = "1"
+  alias       = "${var.alias}"
 }

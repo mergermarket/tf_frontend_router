@@ -27,6 +27,11 @@ variable "alb_domain" {
   type        = "string"
 }
 
+variable "alias" {
+  default     = "1"
+  type        = "string" 
+}
+
 # optional
 variable "bare_redirect_domain_name" {
   type        = "string"
