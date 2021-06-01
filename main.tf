@@ -31,7 +31,7 @@ module "default_backend_task_definition" {
 }
 
 module "default_backend_ecs_service" {
-  source = "github.com/mergermarket/tf_load_balanced_ecs_service"
+  source = "github.com/mergermarket/tf_load_balanced_ecs_service?ref=ordered_placement_strategy_fix"
 
   name                             = "${replace(replace(format("%s-%s", var.env, var.component), "/(.{0,24}).*/", "$1"), "/^-+|-+$/", "")}-default"
   container_name                   = "${var.backend_ip == "404" ? "404" : "haproxy"}"
