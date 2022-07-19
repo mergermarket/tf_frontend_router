@@ -1,4 +1,4 @@
-module "404_container_definition" {
+module "container_definition_404" {
   source = "github.com/mergermarket/tf_ecs_container_definition"
 
   name           = "404"
