@@ -1,4 +1,4 @@
-module "404_container_definition" {
+module "container_definition_404" {
   source = "github.com/mergermarket/tf_ecs_container_definition"
 
   name           = "404"
@@ -27,7 +27,7 @@ module "default_backend_task_definition" {
   source = "github.com/mergermarket/tf_ecs_task_definition"
 
   family                = "${format("%s-%s", var.env, var.component)}-default"
-  container_definitions = ["${var.backend_ip == "404" ? module.404_container_definition.rendered : module.haproxy_proxy_container_definition.rendered}"]
+  container_definitions = ["${var.backend_ip == "404" ? module.container_definition_404.rendered : module.haproxy_proxy_container_definition.rendered}"]
 }
 
 module "default_backend_ecs_service" {
